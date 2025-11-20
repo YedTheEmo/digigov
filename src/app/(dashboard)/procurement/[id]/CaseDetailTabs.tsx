@@ -31,6 +31,26 @@ type CaseDetailData = ProcurementCase & {
   bids?: Bid[];
   quotations?: Quotation[];
   attachments?: Attachment[];
+  bidBulletins?: Array<{ id: string }>;
+  preBid?: { id: string } | null;
+  twgEvaluation?: { id: string } | null;
+  postQualification?: { id: string } | null;
+  bacResolution?: { id: string } | null;
+  award?: { id: string } | null;
+  purchaseOrder?: { id: string } | null;
+  contract?: { id: string } | null;
+  ntp?: { id: string } | null;
+  deliveries?: Array<{ id: string }>;
+  inspection?: { id: string } | null;
+  acceptance?: { id: string } | null;
+  ors?: { id: string } | null;
+  dv?: { id: string } | null;
+  check?: { id: string } | null;
+  checkAdvice?: { id: string } | null;
+  progressBilling?: { id: string } | null;
+  pmtInspection?: { id: string } | null;
+  rfq?: { id: string } | null;
+  abstract?: { id: string; createdAt?: Date | null } | null;
 };
 
 export function CaseDetailTabs({ caseData, caseId }: { caseData: CaseDetailData; caseId: string }) {
@@ -184,13 +204,13 @@ export function CaseDetailTabs({ caseData, caseId }: { caseData: CaseDetailData;
             <CardTitle>Activity Timeline</CardTitle>
           </CardHeader>
           <CardContent>
-            {caseData.activityLogs?.length > 0 ? (
+            {caseData.activityLogs && caseData.activityLogs.length > 0 ? (
               <div className="space-y-4">
                 {caseData.activityLogs.map((log: ActivityLog, index: number) => (
                   <div key={log.id} className="flex gap-4">
                     <div className="flex flex-col items-center">
                       <div className="w-3 h-3 rounded-full bg-blue-600 dark:bg-blue-500"></div>
-                      {index < caseData.activityLogs.length - 1 && (
+                      {index < (caseData.activityLogs?.length ?? 0) - 1 && (
                         <div className="w-0.5 flex-1 bg-gray-200 dark:bg-gray-700 my-1"></div>
                       )}
                     </div>
@@ -231,7 +251,7 @@ export function CaseDetailTabs({ caseData, caseId }: { caseData: CaseDetailData;
           </CardHeader>
           <CardContent>
             {caseData.method === 'PUBLIC_BIDDING' ? (
-              caseData.bids?.length > 0 ? (
+              caseData.bids && caseData.bids.length > 0 ? (
                 <Table>
                   <THead>
                     <TR>
@@ -289,7 +309,7 @@ export function CaseDetailTabs({ caseData, caseId }: { caseData: CaseDetailData;
                   </div>
                 )}
 
-                {caseData.quotations?.length > 0 ? (
+                {caseData.quotations && caseData.quotations.length > 0 ? (
                   <Table>
                     <THead>
                       <TR>
@@ -384,7 +404,7 @@ export function CaseDetailTabs({ caseData, caseId }: { caseData: CaseDetailData;
             <div className="space-y-4">
               <Uploader caseId={caseId} />
 
-              {caseData.attachments?.length > 0 ? (
+              {caseData.attachments && caseData.attachments.length > 0 ? (
                 <div className="space-y-2">
                   {caseData.attachments.map((attachment: Attachment) => (
                     <div

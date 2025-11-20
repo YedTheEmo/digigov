@@ -3,8 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { assertCanTransition } from '@/lib/workflows/procurement';
 import type { CaseState } from '@/generated/prisma';
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
-  const caseId = params.id;
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id: caseId } = await params;
   const { action, payload } = await req.json();
 
   if (payload?.nextState) {

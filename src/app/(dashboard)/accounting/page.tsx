@@ -33,7 +33,6 @@ export default async function AccountingPage({
   if (search) {
     where.OR = [
       { title: { contains: search, mode: 'insensitive' } },
-      { currentState: { contains: search, mode: 'insensitive' } },
     ];
   }
 
@@ -41,10 +40,10 @@ export default async function AccountingPage({
     where.currentState = state as CaseState;
   } else if (filterMode === 'pre-accounting') {
     // Cases ready for Accounting (ORS)
-    where.currentState = { in: PRE_ACCOUNTING_STATES as CaseState[] };
+    where.currentState = { in: [...PRE_ACCOUNTING_STATES] as CaseState[] };
   } else if (filterMode === 'post-accounting') {
     // Cases that have gone through Accounting (DV and beyond)
-    where.currentState = { in: POST_ACCOUNTING_STATES as CaseState[] };
+    where.currentState = { in: [...POST_ACCOUNTING_STATES] as CaseState[] };
   }
 
   // Build orderBy

@@ -10,8 +10,9 @@ import { transitionCaseState } from '@/lib/workflows/procurement';
 import Link from 'next/link';
 import { CaseDetailTabs } from './CaseDetailTabs';
 import { QuickActions } from './QuickActions';
-import { getCurrentOwner, getNextStepMessage } from '@/lib/casesLifecycle';
+import { getCurrentOwner, getNextStepMessage, type LifecycleStageId } from '@/lib/casesLifecycle';
 import { CaseHeader } from '@/components/app/CaseHeader';
+import type { Prisma } from '@/generated/prisma';
 
 async function buildCookieHeader() {
   const store = await cookies();
@@ -382,7 +383,7 @@ export default async function CaseDetail(props: {
     }
   }
 
-  async function recordBACResolution(formData: FormData) {
+  async function recordBACResolution(formData: FormData): Promise<{ success: boolean; error?: string }> {
     'use server';
     try {
       const cookieHeader = await buildCookieHeader();
@@ -395,12 +396,19 @@ export default async function CaseDetail(props: {
       if (!res.ok) {
         const message = await res.text().catch(() => res.statusText);
         console.error('Failed to record BAC Resolution:', message);
-        return;
+        return { success: false, error: message };
       }
       revalidatePath(`/(dashboard)/procurement/${id}`);
+      return { success: true };
     } catch (error) {
       console.error('Failed to record BAC Resolution:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
+  }
+
+  async function recordBACResolutionFormAction(formData: FormData) {
+    'use server';
+    await recordBACResolution(formData);
   }
 
   async function recordProgressBilling(formData: FormData) {
@@ -636,7 +644,7 @@ export default async function CaseDetail(props: {
 
                 {/* BAC Resolution */}
                 {c.currentState === 'POST_QUALIFICATION' && can(['BAC_SECRETARIAT', 'ADMIN']) && (
-                  <form action={recordBACResolution} className="flex flex-wrap items-center gap-2">
+                  <form action={recordBACResolutionFormAction} className="flex flex-wrap items-center gap-2">
                     <Input name="notes" placeholder="Resolution Notes" className="min-w-[200px]" />
                     <Button type="submit" variant="secondary" size="sm">
                       Record BAC Resolution

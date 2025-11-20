@@ -71,9 +71,10 @@ export class ApiClient {
   async login(email: string, password: string) {
     // Fetch CSRF token
     const csrf = await this.get('/api/auth/csrf');
-    if (!csrf.ok || !csrf.data?.csrfToken) throw new Error(`CSRF failed (${csrf.status})`);
+    const csrfData = csrf.data as { csrfToken?: string } | null;
+    if (!csrf.ok || !csrfData?.csrfToken) throw new Error(`CSRF failed (${csrf.status})`);
     const form = new URLSearchParams();
-    form.set('csrfToken', String(csrf.data.csrfToken));
+    form.set('csrfToken', String(csrfData.csrfToken));
     form.set('email', email);
     form.set('password', password);
     form.set('callbackUrl', `${this.baseUrl}/`);
@@ -84,10 +85,10 @@ export class ApiClient {
     }
   }
 
-  async createCase(title: string, method: 'PUBLIC_BIDDING' | 'SMALL_VALUE_RFQ' | 'INFRASTRUCTURE') {
+  async createCase(title: string, method: 'PUBLIC_BIDDING' | 'SMALL_VALUE_RFQ' | 'INFRASTRUCTURE'): Promise<{ id: string }> {
     const res = await this.post('/api/cases', { title, method, regime: 'RA9184' });
     if (!res.ok) throw new Error(`Create case failed (${res.status})`);
-    return res.data;
+    return res.data as { id: string };
   }
 
   async fetchCaseById(id: string) {

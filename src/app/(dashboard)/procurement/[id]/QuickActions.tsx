@@ -10,7 +10,17 @@ import { Select } from '@/components/ui/select';
 import type { ProcurementCase, Quotation, Bid } from '@/generated/prisma';
 
 type QuickActionsProps = {
-  caseData: ProcurementCase;
+  caseData: ProcurementCase & {
+    quotations?: Quotation[];
+    bids?: Bid[];
+    rfq?: { id: string } | null;
+    abstract?: { id: string } | null;
+    bacResolution?: { id: string } | null;
+    award?: { id: string } | null;
+    purchaseOrder?: { id: string } | null;
+    contract?: { id: string } | null;
+    ntp?: { id: string } | null;
+  };
   role: string;
   startPosting: (formData: FormData) => Promise<{ success: boolean; error?: string }>;
   issueRFQ: (formData: FormData) => Promise<{ success: boolean; error?: string }>;
@@ -227,12 +237,12 @@ export function QuickActions({
               <option value="" disabled selected>Select Supplier</option>
               {c.quotations?.map((q: Quotation) => (
                 <option key={q.id} value={q.supplierName}>
-                  {q.supplierName} - {q.amount}
+                  {q.supplierName} - {q.amount ? String(q.amount) : 'N/A'}
                 </option>
               ))}
               {c.bids?.map((b: Bid) => (
                 <option key={b.id} value={b.bidderName}>
-                  {b.bidderName} - {b.amount}
+                  {b.bidderName} - {b.amount ? String(b.amount) : 'N/A'}
                 </option>
               ))}
             </Select>

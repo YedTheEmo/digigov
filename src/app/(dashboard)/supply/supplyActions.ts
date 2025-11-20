@@ -4,13 +4,14 @@ import { DeliverySchema, InspectionSchema, AcceptanceSchema } from '@/lib/valida
 import { assertCanTransition } from '@/lib/workflows/procurement';
 import { ensureRole } from '@/lib/authz';
 import { logActivity } from '@/lib/activity';
+import type { CaseState, UserRole } from '@/generated/prisma';
 
 export async function recordDelivery(formData: FormData) {
   'use server';
   try {
     const authz = await ensureRole(['SUPPLY_MANAGER', 'ADMIN'] as UserRole[]);
     if (!authz.ok) {
-      return { success: false as const, error: 'Not authorized to record delivery.' as const };
+      return { success: false, error: 'Not authorized to record delivery.' };
     }
     const actorId = authz.user.id;
 
@@ -81,12 +82,12 @@ export async function recordDelivery(formData: FormData) {
     revalidatePath('/(dashboard)/supply');
     revalidatePath(`/(dashboard)/supply/${id}`);
     revalidatePath(`/(dashboard)/procurement/${id}`);
-    return { success: true as const };
+    return { success: true };
   } catch (error) {
     console.error('Failed to record delivery from Supply workspace:', error);
     const message = (error as Error)?.message || 'Failed to record delivery from Supply workspace.';
     console.error(message);
-    return { success: false as const, error: message as const };
+    return { success: false, error: message };
   }
 }
 
@@ -95,7 +96,7 @@ export async function submitInspection(formData: FormData) {
   try {
     const authz = await ensureRole(['SUPPLY_MANAGER', 'ADMIN'] as UserRole[]);
     if (!authz.ok) {
-      return { success: false as const, error: 'Not authorized to record inspection.' as const };
+      return { success: false, error: 'Not authorized to record inspection.' };
     }
     const actorId = authz.user.id;
 
@@ -173,12 +174,12 @@ export async function submitInspection(formData: FormData) {
     revalidatePath('/(dashboard)/supply');
     revalidatePath(`/(dashboard)/supply/${id}`);
     revalidatePath(`/(dashboard)/procurement/${id}`);
-    return { success: true as const };
+    return { success: true };
   } catch (error) {
     console.error('Failed to submit inspection from Supply workspace:', error);
     const message = (error as Error)?.message || 'Failed to submit inspection from Supply workspace.';
     console.error(message);
-    return { success: false as const, error: message as const };
+    return { success: false, error: message };
   }
 }
 
@@ -187,7 +188,7 @@ export async function submitAcceptance(formData: FormData) {
   try {
     const authz = await ensureRole(['SUPPLY_MANAGER', 'ADMIN'] as UserRole[]);
     if (!authz.ok) {
-      return { success: false as const, error: 'Not authorized to record acceptance.' as const };
+      return { success: false, error: 'Not authorized to record acceptance.' };
     }
     const actorId = authz.user.id;
 
@@ -259,12 +260,12 @@ export async function submitAcceptance(formData: FormData) {
     revalidatePath('/(dashboard)/supply');
     revalidatePath(`/(dashboard)/supply/${id}`);
     revalidatePath(`/(dashboard)/procurement/${id}`);
-    return { success: true as const };
+    return { success: true };
   } catch (error) {
     console.error('Failed to submit acceptance from Supply workspace:', error);
     const message = (error as Error)?.message || 'Failed to submit acceptance from Supply workspace.';
     console.error(message);
-    return { success: false as const, error: message as const };
+    return { success: false, error: message };
   }
 }
 

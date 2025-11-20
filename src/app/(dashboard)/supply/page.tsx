@@ -44,7 +44,6 @@ export default async function SupplyPage({
   if (search) {
     where.OR = [
       { title: { contains: search, mode: 'insensitive' } },
-      { currentState: { contains: search, mode: 'insensitive' } },
     ];
   }
 
@@ -52,10 +51,10 @@ export default async function SupplyPage({
     where.currentState = state as CaseState;
   } else if (filterMode === 'pre-supply') {
     // Cases ready for Supply (NTP_ISSUED) or currently in Supply stages
-    where.currentState = { in: SUPPLY_STATES as CaseState[] };
+    where.currentState = { in: [...SUPPLY_STATES] as CaseState[] };
   } else if (filterMode === 'post-supply') {
     // Cases that have gone through Supply (ACCEPTANCE and beyond)
-    where.currentState = { in: POST_SUPPLY_STATES as CaseState[] };
+    where.currentState = { in: [...POST_SUPPLY_STATES] as CaseState[] };
   }
 
   // Build orderBy

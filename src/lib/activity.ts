@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import type { CaseState } from '@/generated/prisma';
+import type { CaseState, Prisma } from '@/generated/prisma';
 
 export async function logActivity(params: {
   caseId: string;
@@ -18,7 +18,7 @@ export async function logActivity(params: {
       fromState,
       toState,
       legalBasis,
-      payload: payload as Record<string, unknown> | null,
+      payload: payload ? (payload as Prisma.InputJsonValue) : undefined,
       actorId: actorId ?? undefined,
     },
   });

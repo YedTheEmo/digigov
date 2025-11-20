@@ -11,6 +11,21 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { getCurrentOwner, type LifecycleStageId } from '@/lib/casesLifecycle';
 import { getActionMeta } from '@/lib/activityLabels';
 import { recordDelivery, submitInspection, submitAcceptance } from '../supplyActions';
+
+async function recordDeliveryFormAction(formData: FormData): Promise<void> {
+  'use server';
+  await recordDelivery(formData);
+}
+
+async function submitInspectionFormAction(formData: FormData): Promise<void> {
+  'use server';
+  await submitInspection(formData);
+}
+
+async function submitAcceptanceFormAction(formData: FormData): Promise<void> {
+  'use server';
+  await submitAcceptance(formData);
+}
 import { Uploader } from '@/app/(dashboard)/procurement/[id]/Uploader';
 import { getAttachmentDisplayName } from '@/lib/attachments';
 import { ProgressStages } from '@/components/app/ProgressStages';
@@ -93,7 +108,7 @@ export default async function SupplyCaseDetail(props: {
               </p>
             )}
             <form
-              action={recordDelivery}
+              action={recordDeliveryFormAction}
               className="grid grid-cols-1 md:grid-cols-3 gap-4"
             >
               <input type="hidden" name="id" value={c.id} />
@@ -139,7 +154,7 @@ export default async function SupplyCaseDetail(props: {
               </p>
             )}
             <form
-              action={submitInspection}
+              action={submitInspectionFormAction}
               className="grid grid-cols-1 md:grid-cols-3 gap-4"
             >
               <input type="hidden" name="id" value={c.id} />
@@ -183,7 +198,7 @@ export default async function SupplyCaseDetail(props: {
               </p>
             )}
             <form
-              action={submitAcceptance}
+              action={submitAcceptanceFormAction}
               className="grid grid-cols-1 md:grid-cols-2 gap-4"
             >
               <input type="hidden" name="id" value={c.id} />
@@ -352,7 +367,7 @@ export default async function SupplyCaseDetail(props: {
                 <Uploader caseId={c.id} />
                 {c.attachments?.length ? (
                   <div className="space-y-2">
-                    {c.attachments.map((attachment: { id: string; type: string; url: string; uploadedBy: string | null }) => (
+                    {c.attachments.map((attachment: { id: string; type: string; url: string; uploadedBy: string | null; createdAt?: Date | null }) => (
                       <div
                         key={attachment.id}
                         className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"

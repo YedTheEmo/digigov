@@ -33,7 +33,6 @@ export default async function CashierPage({
   if (search) {
     where.OR = [
       { title: { contains: search, mode: 'insensitive' } },
-      { currentState: { contains: search, mode: 'insensitive' } },
     ];
   }
 
@@ -41,10 +40,10 @@ export default async function CashierPage({
     where.currentState = state as CaseState;
   } else if (filterMode === 'pre-cashier') {
     // Cases ready for Cashier (DV)
-    where.currentState = { in: PRE_CASHIER_STATES as CaseState[] };
+    where.currentState = { in: [...PRE_CASHIER_STATES] as CaseState[] };
   } else if (filterMode === 'post-cashier') {
     // Cases that have gone through Cashier (CHECK and CLOSED)
-    where.currentState = { in: POST_CASHIER_STATES as CaseState[] };
+    where.currentState = { in: [...POST_CASHIER_STATES] as CaseState[] };
   }
 
   // Build orderBy

@@ -33,7 +33,6 @@ export default async function BudgetPage({
   if (search) {
     where.OR = [
       { title: { contains: search, mode: 'insensitive' } },
-      { currentState: { contains: search, mode: 'insensitive' } },
     ];
   }
 
@@ -41,10 +40,10 @@ export default async function BudgetPage({
     where.currentState = state as CaseState;
   } else if (filterMode === 'pre-budget') {
     // Cases ready for Budget (ACCEPTANCE)
-    where.currentState = { in: PRE_BUDGET_STATES as CaseState[] };
+    where.currentState = { in: [...PRE_BUDGET_STATES] as CaseState[] };
   } else if (filterMode === 'post-budget') {
     // Cases that have gone through Budget (ORS and beyond)
-    where.currentState = { in: POST_BUDGET_STATES as CaseState[] };
+    where.currentState = { in: [...POST_BUDGET_STATES] as CaseState[] };
   }
 
   // Build orderBy

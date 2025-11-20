@@ -266,7 +266,7 @@ export function CashierDetailTabs({ caseData, caseId }: { caseData: CashierCaseD
             <div className="space-y-4">
               <Uploader caseId={caseId} />
               
-              {caseData.attachments?.length > 0 ? (
+              {caseData.attachments && caseData.attachments.length > 0 ? (
                 <div className="space-y-2">
                   {caseData.attachments.map((attachment: Attachment) => (
                     <div

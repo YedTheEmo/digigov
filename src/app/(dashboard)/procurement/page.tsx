@@ -8,9 +8,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
 import { logActivity } from '@/lib/activity';
-import type { ProcurementMethod } from '@/generated/prisma';
+import type { ProcurementMethod, Prisma, CaseState } from '@/generated/prisma';
 
-async function createCase(formData: FormData) {
+async function createCase(formData: FormData): Promise<{ success: boolean; id?: string; error?: string }> {
   'use server';
   try {
     const title = String(formData.get('title') || 'Untitled');
@@ -29,6 +29,12 @@ async function createCase(formData: FormData) {
       error: (error as any)?.message ?? 'Failed to create case',
     };
   }
+}
+
+async function createCaseFormAction(formData: FormData): Promise<void> {
+  'use server';
+  await createCase(formData);
+  return;
 }
 
 function getStateVariant(
@@ -86,22 +92,21 @@ export default async function ProcurementPage({
   if (search) {
     where.OR = [
       { title: { contains: search, mode: 'insensitive' } },
-      { currentState: { contains: search, mode: 'insensitive' } },
     ];
   }
   
   if (method && method !== 'ALL') {
-    where.method = method;
+    where.method = method as ProcurementMethod;
   }
 
   if (state && state !== 'ALL') {
     where.currentState = state as CaseState;
   } else if (filterMode === 'pre-procurement') {
     // Cases in Procurement stages (DRAFT through NTP_ISSUED)
-    where.currentState = { in: PRE_PROCUREMENT_STATES as CaseState[] };
+    where.currentState = { in: [...PRE_PROCUREMENT_STATES] as CaseState[] };
   } else if (filterMode === 'post-procurement') {
     // Cases that have gone through Procurement (DELIVERY and beyond)
-    where.currentState = { in: POST_PROCUREMENT_STATES as CaseState[] };
+    where.currentState = { in: [...POST_PROCUREMENT_STATES] as CaseState[] };
   }
 
   // Build orderBy
@@ -137,7 +142,7 @@ export default async function ProcurementPage({
           <CardDescription>Start a new procurement process</CardDescription>
         </CardHeader>
         <CardContent>
-          <form action={createCase} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[1fr_1fr_auto] gap-8 items-end max-w-5xl">
+          <form action={createCaseFormAction} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[1fr_1fr_auto] gap-8 items-end max-w-5xl">
             <Input 
               name="title" 
               label="Case Title"

@@ -368,7 +368,6 @@ export default async function CaseOverviewPage(props: {
                         </div>
                         <div className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                           {new Date(log.createdAt).toLocaleString()}
-                          {log.actor?.name && ` · ${log.actor.name}`}
                         </div>
                       </div>
                     </div>

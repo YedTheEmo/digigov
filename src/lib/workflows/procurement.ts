@@ -32,7 +32,7 @@ function transitionsForMethod(method: ProcurementMethod) {
       DV: ['CHECK'],
       CHECK: ['CLOSED'],
       CLOSED: [],
-    } as Record<CaseState, CaseState[]>;
+    } as Partial<Record<CaseState, CaseState[]>>;
   }
 
   if (method === 'INFRASTRUCTURE') {
@@ -56,7 +56,7 @@ function transitionsForMethod(method: ProcurementMethod) {
       DV: ['CHECK'],
       CHECK: ['CLOSED'],
       CLOSED: [],
-    } as Record<CaseState, CaseState[]>;
+    } as Partial<Record<CaseState, CaseState[]>>;
   }
 
   // SMALL_VALUE_RFQ default
@@ -78,7 +78,7 @@ function transitionsForMethod(method: ProcurementMethod) {
     DV: ['CHECK'],
     CHECK: ['CLOSED'],
     CLOSED: [],
-  } as Record<CaseState, CaseState[]>;
+  } as Partial<Record<CaseState, CaseState[]>>;
 }
 
 export async function assertCanTransition(case_: ProcurementCase, nextState: CaseState) {

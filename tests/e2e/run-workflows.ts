@@ -289,8 +289,9 @@ async function attachmentsTest(clients: Clients) {
   const key = `${id}/${Date.now()}_test.txt`;
   // sign
   const sign = await procurement.post('/api/uploads/sign', { key, contentType: 'text/plain' });
-  if (!sign.ok || !sign.data?.uploadUrl) throw new Error(`Sign failed: ${sign.status} ${JSON.stringify(sign.data)}`);
-  const uploadUrl = String(sign.data.uploadUrl);
+  const signData = sign.data as { uploadUrl?: string } | null;
+  if (!sign.ok || !signData?.uploadUrl) throw new Error(`Sign failed: ${sign.status} ${JSON.stringify(sign.data)}`);
+  const uploadUrl = String(signData.uploadUrl);
   // put
   const putRes = await fetch(`${BASE_URL}${uploadUrl}`, { method: 'PUT', body: Buffer.from('hello'), headers: { 'Content-Type': 'text/plain' } });
   if (!(putRes.status === 204 || putRes.status === 200)) throw new Error(`Upload failed: ${putRes.status}`);

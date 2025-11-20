@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
 import { getCurrentOwner, getStateVariant, type LifecycleStageId } from '@/lib/casesLifecycle';
+import type { Prisma } from '@/generated/prisma';
 
 export default async function CasesPage({
   searchParams,
@@ -15,7 +16,7 @@ export default async function CasesPage({
   const sp = searchParams ? await searchParams : {};
   const q = (sp?.q || '').trim();
 
-  const where = q
+  const where: Prisma.ProcurementCaseWhereInput = q
     ? {
         OR: [
           { title: { contains: q, mode: 'insensitive' } },

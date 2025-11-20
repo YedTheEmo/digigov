@@ -14,7 +14,7 @@ export interface TooltipProps {
 
 export function Tooltip({ content, children, position = 'top', disabled = false, className = '' }: TooltipProps) {
   const [visible, setVisible] = React.useState(false);
-  const timeoutRef = React.useRef<NodeJS.Timeout>();
+  const timeoutRef = React.useRef<NodeJS.Timeout | undefined>(undefined);
 
   const showTooltip = () => {
     if (disabled) return;
