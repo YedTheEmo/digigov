@@ -27,7 +27,7 @@ export function ThemeToggle() {
     // Save to localStorage
     try {
       localStorage.setItem('theme', newTheme);
-    } catch (error) {
+    } catch {
       // Handle localStorage not available
     }
   };
@@ -48,7 +48,7 @@ export function ThemeToggle() {
       } else {
         document.documentElement.classList.remove('dark');
       }
-    } catch (error) {
+    } catch {
       // Fallback to light theme
     }
   }, [mounted]);

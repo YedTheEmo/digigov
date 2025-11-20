@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
 import Link from 'next/link';
+import type { Prisma } from '@/generated/prisma';
+import type { CaseState } from '@/generated/prisma';
 
 const PRE_BUDGET_STATES = ['ACCEPTANCE'] as const;
 const POST_BUDGET_STATES = ['ORS', 'DV', 'CHECK', 'CLOSED'] as const;
@@ -24,7 +26,7 @@ export default async function BudgetPage({
   const { search, state, sort, filter } = params;
 
   // Build Prisma query with filters
-  const where: any = {};
+  const where: Prisma.ProcurementCaseWhereInput = {};
 
   const filterMode = filter || 'pre-budget'; // pre-budget or post-budget
 
@@ -36,17 +38,17 @@ export default async function BudgetPage({
   }
 
   if (state && state !== 'ALL') {
-    where.currentState = state;
+    where.currentState = state as CaseState;
   } else if (filterMode === 'pre-budget') {
     // Cases ready for Budget (ACCEPTANCE)
-    where.currentState = { in: PRE_BUDGET_STATES as any };
+    where.currentState = { in: PRE_BUDGET_STATES as CaseState[] };
   } else if (filterMode === 'post-budget') {
     // Cases that have gone through Budget (ORS and beyond)
-    where.currentState = { in: POST_BUDGET_STATES as any };
+    where.currentState = { in: POST_BUDGET_STATES as CaseState[] };
   }
 
   // Build orderBy
-  let orderBy: any = { updatedAt: 'desc' }; // default
+  let orderBy: Prisma.ProcurementCaseOrderByWithRelationInput = { updatedAt: 'desc' }; // default
   if (sort === 'oldest') {
     orderBy = { createdAt: 'asc' };
   } else if (sort === 'title-asc') {

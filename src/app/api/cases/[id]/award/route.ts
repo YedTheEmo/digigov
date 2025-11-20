@@ -7,9 +7,10 @@ import { rateLimit, clientIpKey } from '@/lib/rate-limit';
 import { useIdempotencyKey } from '../../../../../lib/idempotency';
 import { sendEmail } from '@/lib/notifications/resend';
 import { assertCanTransition } from '@/lib/workflows/procurement';
+import type { CaseState, UserRole } from '@/generated/prisma';
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const authz = await ensureRole(['APPROVER', 'BAC_SECRETARIAT', 'ADMIN'] as any);
+  const authz = await ensureRole(['APPROVER', 'BAC_SECRETARIAT', 'ADMIN'] as UserRole[]);
   if (!authz.ok) return NextResponse.json({ error: 'Forbidden' }, { status: authz.status });
   const rl = await rateLimit(req, clientIpKey(req, 'award'));
   if (!rl.ok) return NextResponse.json({ error: 'Rate limited' }, { status: 429, headers: { 'Retry-After': String(rl.retryAfter) } });
@@ -26,7 +27,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   if (!c) return NextResponse.json({ error: 'Case not found' }, { status: 404 });
   // For public bidding, require both Post-Qualification PASSED and BAC Resolution per client flow
   if (c.method === 'PUBLIC_BIDDING') {
-    const pq = await (prisma as any).postQualification.findUnique({ where: { caseId } });
+    const pq = await prisma.postQualification.findUnique({ where: { caseId } });
     if (!pq?.passed) return NextResponse.json({ error: 'Post-Qualification must be passed' }, { status: 400 });
     const bac = await prisma.bACResolution.findUnique({ where: { caseId } });
     if (!bac) return NextResponse.json({ error: 'BAC Resolution required' }, { status: 400 });
@@ -35,7 +36,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (!bac) return NextResponse.json({ error: 'BAC Resolution required' }, { status: 400 });
   }
   try {
-    await assertCanTransition(c as any, 'AWARDED' as any);
+    await assertCanTransition(c, 'AWARDED' as CaseState);
   } catch (error) {
     return NextResponse.json(
       { error: (error as Error).message || 'Transition not allowed' },
@@ -58,14 +59,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   await prisma.procurementCase.update({
     where: { id: caseId },
-    data: { currentState: 'AWARDED' as any },
+    data: { currentState: 'AWARDED' as CaseState },
   });
 
   await logActivity({
     caseId,
     action: 'award',
-    fromState: c.currentState as any,
-    toState: 'AWARDED' as any,
+    fromState: c.currentState,
+    toState: 'AWARDED' as CaseState,
   });
 
   await sendEmail({

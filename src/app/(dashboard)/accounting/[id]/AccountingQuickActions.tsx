@@ -4,10 +4,14 @@ import { useTransition } from 'react';
 import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import type { ProcurementCase } from '@/generated/prisma';
 
 type AccountingQuickActionsProps = {
-  caseData: any;
-  submitDV: (formData: FormData) => Promise<any>;
+  caseData: ProcurementCase & {
+    dv?: { dvNumber: string | null } | null;
+    ors?: { orsNumber: string | null } | null;
+  };
+  submitDV: (formData: FormData) => Promise<{ success: boolean; error?: string }>;
 };
 
 export function AccountingQuickActions({

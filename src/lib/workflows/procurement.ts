@@ -234,21 +234,21 @@ export async function transitionCaseState(
       throw new Error('Case not found');
     }
 
-    await assertCanTransition(existing as any, nextState);
+    await assertCanTransition(existing, nextState);
 
     const updated = await tx.procurementCase.update({
       where: { id: caseId },
       data: {
         currentState: nextState,
         ...(options?.updateData ?? {}),
-      } as any,
+      },
     });
 
     if (options?.action) {
       await logActivity({
         caseId,
         action: options.action,
-        fromState: existing.currentState as any,
+        fromState: existing.currentState,
         toState: nextState,
         legalBasis: options.legalBasis ?? null,
         payload: options.payload,

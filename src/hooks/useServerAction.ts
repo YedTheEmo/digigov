@@ -3,10 +3,9 @@
 import { useTransition } from 'react';
 import toast from 'react-hot-toast';
 
-export function useServerAction<T extends (...args: any[]) => Promise<any>>(
-  action: T,
-  options?: { successMessage?: string; errorMessage?: string },
-) {
+export function useServerAction<
+  T extends (...args: unknown[]) => Promise<{ success: boolean; error?: string }>,
+>(action: T, options?: { successMessage?: string; errorMessage?: string }) {
   const [isPending, startTransition] = useTransition();
 
   const execute = async (...args: Parameters<T>) => {

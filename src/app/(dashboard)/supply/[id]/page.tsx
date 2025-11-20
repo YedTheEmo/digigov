@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import Link from 'next/link';
 import { CaseHeader } from '@/components/app/CaseHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -7,12 +8,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { EmptyState } from '@/components/ui/empty-state';
-import { getCurrentOwner } from '@/lib/casesLifecycle';
+import { getCurrentOwner, type LifecycleStageId } from '@/lib/casesLifecycle';
 import { getActionMeta } from '@/lib/activityLabels';
 import { recordDelivery, submitInspection, submitAcceptance } from '../supplyActions';
 import { Uploader } from '@/app/(dashboard)/procurement/[id]/Uploader';
 import { getAttachmentDisplayName } from '@/lib/attachments';
 import { ProgressStages } from '@/components/app/ProgressStages';
+import type { ActivityLog } from '@/generated/prisma';
 
 export default async function SupplyCaseDetail(props: {
   params: Promise<{ id: string }>;
@@ -27,7 +29,7 @@ export default async function SupplyCaseDetail(props: {
       acceptance: true,
       attachments: true,
       activityLogs: { orderBy: { createdAt: 'asc' } },
-    } as any,
+    },
   });
 
   if (!c) {
@@ -38,7 +40,7 @@ export default async function SupplyCaseDetail(props: {
           Case Not Found
         </h2>
         <p className="text-gray-600 dark:text-gray-400 mb-6">
-          The case you're looking for doesn't exist or is not available in the Supply workspace.
+          The case you&apos;re looking for doesn&apos;t exist or is not available in the Supply workspace.
         </p>
         <Link href="/supply">
           <Button variant="primary">Back to Supply</Button>
@@ -47,7 +49,7 @@ export default async function SupplyCaseDetail(props: {
     );
   }
 
-  const owner = getCurrentOwner(c.currentState as any);
+  const owner = getCurrentOwner(c.currentState as LifecycleStageId);
 
   const latestDelivery = c.deliveries?.length
     ? c.deliveries[c.deliveries.length - 1]
@@ -291,7 +293,7 @@ export default async function SupplyCaseDetail(props: {
             <CardContent>
               {(() => {
                 // Filter activity logs to show only supply-related activities
-                const supplyLogs = c.activityLogs?.filter((log: any) => {
+                const supplyLogs = c.activityLogs?.filter((log: ActivityLog) => {
                   const meta = getActionMeta(log.action);
                   return meta.category === 'supply' || 
                          log.action === 'delivery_recorded' || 
@@ -304,7 +306,7 @@ export default async function SupplyCaseDetail(props: {
                 
                 return supplyLogs.length > 0 ? (
                   <div className="space-y-4">
-                    {supplyLogs.map((log: any, index: number) => (
+                    {supplyLogs.map((log: ActivityLog, index: number) => (
                       <div key={log.id} className="flex gap-4">
                         <div className="flex flex-col items-center">
                           <div className="w-3 h-3 rounded-full bg-blue-600 dark:bg-blue-500" />
@@ -350,7 +352,7 @@ export default async function SupplyCaseDetail(props: {
                 <Uploader caseId={c.id} />
                 {c.attachments?.length ? (
                   <div className="space-y-2">
-                    {c.attachments.map((attachment: any) => (
+                    {c.attachments.map((attachment: { id: string; type: string; url: string; uploadedBy: string | null }) => (
                       <div
                         key={attachment.id}
                         className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"

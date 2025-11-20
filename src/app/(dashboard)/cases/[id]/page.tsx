@@ -4,51 +4,54 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
 import { getActionMeta } from '@/lib/activityLabels';
-import { getLifecycleSummary, getCurrentOwner, getNextStepMessage, getStateVariant } from '@/lib/casesLifecycle';
+import { getLifecycleSummary, getCurrentOwner, getNextStepMessage, getStateVariant, type LifecycleStageId } from '@/lib/casesLifecycle';
+import type { Prisma, ActivityLog } from '@/generated/prisma';
 
 export default async function CaseOverviewPage(props: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await props.params;
 
-  const c = await prisma.procurementCase.findUnique({
-    where: { id },
-    include: {
-      rfq: true,
-      quotations: true,
-      abstract: true,
-      bacResolution: true,
-      award: true,
-      purchaseOrder: true,
-      contract: true,
-      ntp: true,
-      progressBilling: true,
-      pmtInspection: true,
-      deliveries: true,
-      inspection: true,
-      acceptance: true,
-      ors: true,
-      dv: true,
-      check: true,
-      checkAdvice: true,
-      bidBulletins: true,
-      preBid: true,
-      bids: true,
-      twgEvaluation: true,
-      postQualification: true,
-      attachments: true,
-      activityLogs: {
-        orderBy: { createdAt: 'asc' },
-        include: {
-          actor: {
-            select: {
-              name: true,
-            },
+  const include: Prisma.ProcurementCaseInclude = {
+    rfq: true,
+    quotations: true,
+    abstract: true,
+    bacResolution: true,
+    award: true,
+    purchaseOrder: true,
+    contract: true,
+    ntp: true,
+    progressBilling: true,
+    pmtInspection: true,
+    deliveries: true,
+    inspection: true,
+    acceptance: true,
+    ors: true,
+    dv: true,
+    check: true,
+    checkAdvice: true,
+    bidBulletins: true,
+    preBid: true,
+    bids: true,
+    twgEvaluation: true,
+    postQualification: true,
+    attachments: true,
+    activityLogs: {
+      orderBy: { createdAt: 'asc' },
+      include: {
+        actor: {
+          select: {
+            name: true,
           },
         },
       },
-    } as any,
-  }) as any;
+    },
+  };
+
+  const c = await prisma.procurementCase.findUnique({
+    where: { id },
+    include,
+  });
 
   if (!c) {
     return (
@@ -68,8 +71,8 @@ export default async function CaseOverviewPage(props: {
   }
 
   const lifecycle = getLifecycleSummary(c);
-  const owner = getCurrentOwner(c.currentState as any);
-  const nextStepMessage = getNextStepMessage(c.currentState as any);
+  const owner = getCurrentOwner(c.currentState as LifecycleStageId);
+  const nextStepMessage = getNextStepMessage(c.currentState as LifecycleStageId);
 
   const stagesByModule = lifecycle.stages.reduce<Record<string, typeof lifecycle.stages>>(
     (acc, stage) => {
@@ -339,7 +342,7 @@ export default async function CaseOverviewPage(props: {
               {c.activityLogs
                 .slice()
                 .reverse()
-                .map((log: any, index: number) => {
+                .map((log: ActivityLog, index: number) => {
                   const meta = getActionMeta(log.action);
                   return (
                     <div key={log.id} className="flex gap-4">

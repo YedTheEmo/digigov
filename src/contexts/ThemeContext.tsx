@@ -25,7 +25,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       const initialTheme = stored || (prefersDark ? 'dark' : 'light');
       setThemeState(initialTheme);
       document.documentElement.classList.toggle('dark', initialTheme === 'dark');
-    } catch (error) {
+    } catch {
       // Fallback to light theme if localStorage is not available
       setThemeState('light');
     }
@@ -35,7 +35,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     setThemeState(newTheme);
     try {
       localStorage.setItem('theme', newTheme);
-    } catch (error) {
+    } catch {
       // Handle localStorage not available
     }
     document.documentElement.classList.toggle('dark', newTheme === 'dark');

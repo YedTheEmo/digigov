@@ -15,6 +15,7 @@ import Link from 'next/link';
 import { getActionMeta } from '@/lib/activityLabels';
 import { getAttachmentDisplayName } from '@/lib/attachments';
 import { ProgressStages } from '@/components/app/ProgressStages';
+import type { ProcurementCase, ActivityLog, Bid, Quotation, Attachment } from '@/generated/prisma';
 
 type CaseStateVariant = 'completed' | 'cancelled' | 'pending' | 'info' | 'warning';
 
@@ -25,7 +26,14 @@ function getStateVariant(state: string): CaseStateVariant {
   return 'info';
 }
 
-export function CaseDetailTabs({ caseData, caseId }: { caseData: any; caseId: string }) {
+type CaseDetailData = ProcurementCase & {
+  activityLogs?: ActivityLog[];
+  bids?: Bid[];
+  quotations?: Quotation[];
+  attachments?: Attachment[];
+};
+
+export function CaseDetailTabs({ caseData, caseId }: { caseData: CaseDetailData; caseId: string }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [quoteError, setQuoteError] = useState<string | null>(null);
@@ -72,7 +80,7 @@ export function CaseDetailTabs({ caseData, caseId }: { caseData: any; caseId: st
       startTransition(() => {
         router.refresh();
       });
-    } catch (err) {
+    } catch {
       const message = 'Unexpected error while adding quotation.';
       setQuoteError(message);
       toast.error(message);
@@ -178,7 +186,7 @@ export function CaseDetailTabs({ caseData, caseId }: { caseData: any; caseId: st
           <CardContent>
             {caseData.activityLogs?.length > 0 ? (
               <div className="space-y-4">
-                {caseData.activityLogs.map((log: any, index: number) => (
+                {caseData.activityLogs.map((log: ActivityLog, index: number) => (
                   <div key={log.id} className="flex gap-4">
                     <div className="flex flex-col items-center">
                       <div className="w-3 h-3 rounded-full bg-blue-600 dark:bg-blue-500"></div>
@@ -234,8 +242,8 @@ export function CaseDetailTabs({ caseData, caseId }: { caseData: any; caseId: st
                   </THead>
                   <TBody>
                     {caseData.bids
-                      .sort((a: any, b: any) => Number(a.amount) - Number(b.amount))
-                      .map((bid: any, index: number) => (
+                      .sort((a: Bid, b: Bid) => Number(a.amount) - Number(b.amount))
+                      .map((bid: Bid, index: number) => (
                         <TR key={bid.id}>
                           <TD>
                             <div className="flex items-center gap-2">
@@ -292,8 +300,8 @@ export function CaseDetailTabs({ caseData, caseId }: { caseData: any; caseId: st
                     </THead>
                     <TBody>
                       {caseData.quotations
-                        .sort((a: any, b: any) => Number(a.amount) - Number(b.amount))
-                        .map((quotation: any, index: number) => (
+                        .sort((a: Quotation, b: Quotation) => Number(a.amount) - Number(b.amount))
+                        .map((quotation: Quotation, index: number) => (
                           <TR key={quotation.id}>
                             <TD>
                               <div className="flex items-center gap-2">
@@ -378,7 +386,7 @@ export function CaseDetailTabs({ caseData, caseId }: { caseData: any; caseId: st
 
               {caseData.attachments?.length > 0 ? (
                 <div className="space-y-2">
-                  {caseData.attachments.map((attachment: any) => (
+                  {caseData.attachments.map((attachment: Attachment) => (
                     <div
                       key={attachment.id}
                       className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"

@@ -36,7 +36,7 @@ export function Uploader({ caseId }: { caseId: string }) {
       });
       setFile(null);
       window.location.reload();
-    } catch (e: any) {
+    } catch {
       setError('Upload failed');
     } finally {
       setUploading(false);

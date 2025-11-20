@@ -6,6 +6,7 @@ import { DeliverySchema } from '@/lib/validators/post_award';
 import { rateLimit, clientIpKey } from '@/lib/rate-limit';
 import { useIdempotencyKey } from '@/lib/idempotency';
 import { assertCanTransition } from '@/lib/workflows/procurement';
+import type { CaseState, UserRole } from '@/generated/prisma';
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -14,7 +15,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 }
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const authz = await ensureRole(['SUPPLY_MANAGER', 'ADMIN'] as any);
+  const authz = await ensureRole(['SUPPLY_MANAGER', 'ADMIN'] as UserRole[]);
   if (!authz.ok) return NextResponse.json({ error: 'Forbidden' }, { status: authz.status });
   const { id: caseId } = await params;
   const rl = await rateLimit(req, clientIpKey(req, 'delivery'));
@@ -36,7 +37,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const existing = await prisma.procurementCase.findUnique({ where: { id: caseId } });
   if (!existing) return NextResponse.json({ error: 'Case not found' }, { status: 404 });
 
-  const currentState = existing.currentState as any;
+  const currentState = existing.currentState as CaseState;
   const canFirstTransition = currentState === 'NTP_ISSUED';
   const canAppendDelivery = ['DELIVERY', 'INSPECTION', 'ACCEPTANCE', 'ORS', 'DV', 'CHECK', 'CLOSED'].includes(
     currentState,
@@ -51,7 +52,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   if (canFirstTransition) {
     try {
-      await assertCanTransition(existing as any, 'DELIVERY' as any);
+      await assertCanTransition(existing, 'DELIVERY' as CaseState);
     } catch (error) {
       return NextResponse.json(
         { error: (error as Error).message || 'Transition not allowed' },
@@ -71,15 +72,15 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   if (canFirstTransition) {
     await prisma.procurementCase.update({
       where: { id: caseId },
-      data: { currentState: 'DELIVERY' as any },
+      data: { currentState: 'DELIVERY' as CaseState },
     });
   }
 
   await logActivity({
     caseId,
     action: 'delivery',
-    fromState: existing.currentState as any,
-    toState: (canFirstTransition ? 'DELIVERY' : existing.currentState) as any,
+    fromState: existing.currentState,
+    toState: (canFirstTransition ? 'DELIVERY' : existing.currentState) as CaseState,
     legalBasis: 'RA 9184: Contract Implementation/Delivery',
   });
 

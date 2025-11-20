@@ -5,10 +5,11 @@ import { rateLimit, clientIpKey } from '@/lib/rate-limit';
 import { useIdempotencyKey } from '../../../../../lib/idempotency';
 import { assertCanTransition } from '@/lib/workflows/procurement';
 import { logActivity } from '@/lib/activity';
+import type { CaseState, UserRole } from '@/generated/prisma';
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const authz = await ensureRole(['APPROVER', 'ADMIN'] as any);
+    const authz = await ensureRole(['APPROVER', 'ADMIN'] as UserRole[]);
     if (!authz.ok) return NextResponse.json({ error: 'Forbidden' }, { status: authz.status });
 
     const { id: caseId } = await params;
@@ -35,7 +36,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (!existing) return NextResponse.json({ error: 'Case not found' }, { status: 404 });
 
     try {
-      await assertCanTransition(existing as any, 'PO_APPROVED' as any);
+      await assertCanTransition(existing, 'PO_APPROVED' as CaseState);
     } catch (error) {
       return NextResponse.json(
         { error: (error as Error).message || 'Transition not allowed' },
@@ -60,14 +61,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     await prisma.procurementCase.update({
       where: { id: caseId },
-      data: { currentState: 'PO_APPROVED' as any },
+      data: { currentState: 'PO_APPROVED' as CaseState },
     });
 
     await logActivity({
       caseId,
       action: 'po_approved',
-      fromState: existing.currentState as any,
-      toState: 'PO_APPROVED' as any,
+      fromState: existing.currentState,
+      toState: 'PO_APPROVED' as CaseState,
     });
 
     return NextResponse.json(created, { status: 201 });

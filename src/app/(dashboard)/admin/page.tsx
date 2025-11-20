@@ -4,14 +4,15 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, THead, TBody, TR, TH, TD } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
+import type { CaseState } from '@/generated/prisma';
 
 export default async function AdminPage() {
-  const users = await prisma.user.findMany({ orderBy: { role: 'asc' as any } });
+  const users = await prisma.user.findMany({ orderBy: { role: 'asc' } });
   
   // Get some system stats
   const totalCases = await prisma.procurementCase.count();
   const activeCases = await prisma.procurementCase.count({ 
-    where: { currentState: { notIn: ['CLOSED'] as any } } 
+    where: { currentState: { notIn: ['CLOSED'] as CaseState[] } } 
   });
 
   return (

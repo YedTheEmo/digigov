@@ -1,8 +1,8 @@
-export type PresignParams = { key: string; contentType: string };
+export type PresignParams = { key: string; contentType?: string };
 export type PresignResult = { uploadUrl: string; key: string; fields?: Record<string, string> };
 
 // Dev-friendly stub: returns a mock PUT URL. Replace with AWS SDK v3 if env is set.
-export async function presignUpload({ key, contentType }: PresignParams): Promise<PresignResult> {
+export async function presignUpload({ key }: PresignParams): Promise<PresignResult> {
   const bucket = process.env.S3_BUCKET;
   const region = process.env.AWS_REGION;
   const hasAws = !!(process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY && bucket && region);

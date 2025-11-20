@@ -8,7 +8,7 @@ import { logActivity } from '@/lib/activity';
 export async function recordDelivery(formData: FormData) {
   'use server';
   try {
-    const authz = await ensureRole(['SUPPLY_MANAGER', 'ADMIN'] as any);
+    const authz = await ensureRole(['SUPPLY_MANAGER', 'ADMIN'] as UserRole[]);
     if (!authz.ok) {
       return { success: false as const, error: 'Not authorized to record delivery.' as const };
     }
@@ -29,7 +29,7 @@ export async function recordDelivery(formData: FormData) {
     const existing = await prisma.procurementCase.findUnique({ where: { id } });
     if (!existing) throw new Error('Case not found');
 
-    const currentState = existing.currentState as any;
+    const currentState = existing.currentState as CaseState;
     const previousState = currentState;
     const canFirstTransition = currentState === 'NTP_ISSUED';
     const canAppendDelivery = ['DELIVERY', 'INSPECTION', 'ACCEPTANCE', 'ORS', 'DV', 'CHECK', 'CLOSED'].includes(
@@ -43,7 +43,7 @@ export async function recordDelivery(formData: FormData) {
     }
 
     if (canFirstTransition) {
-      await assertCanTransition(existing as any, 'DELIVERY' as any);
+      await assertCanTransition(existing, 'DELIVERY' as CaseState);
     }
 
     await prisma.$transaction(async (tx) => {
@@ -57,7 +57,7 @@ export async function recordDelivery(formData: FormData) {
       if (canFirstTransition) {
         await tx.procurementCase.update({
           where: { id },
-          data: { currentState: 'DELIVERY' as any },
+          data: { currentState: 'DELIVERY' as CaseState },
         });
       }
     });
@@ -66,8 +66,8 @@ export async function recordDelivery(formData: FormData) {
       await logActivity({
         caseId: id,
         action: 'delivery_recorded',
-        fromState: previousState as any,
-        toState: nextState as any,
+        fromState: previousState,
+        toState: nextState as CaseState,
         actorId,
         payload: {
           deliveredAt: deliveredAtDate.toISOString(),
@@ -93,7 +93,7 @@ export async function recordDelivery(formData: FormData) {
 export async function submitInspection(formData: FormData) {
   'use server';
   try {
-    const authz = await ensureRole(['SUPPLY_MANAGER', 'ADMIN'] as any);
+    const authz = await ensureRole(['SUPPLY_MANAGER', 'ADMIN'] as UserRole[]);
     if (!authz.ok) {
       return { success: false as const, error: 'Not authorized to record inspection.' as const };
     }
@@ -117,7 +117,7 @@ export async function submitInspection(formData: FormData) {
     const existing = await prisma.procurementCase.findUnique({ where: { id } });
     if (!existing) throw new Error('Case not found');
 
-    const currentState = existing.currentState as any;
+    const currentState = existing.currentState as CaseState;
     const previousState = currentState;
     const canFirstTransition = currentState === 'DELIVERY';
     const canEditInspection = ['INSPECTION', 'ACCEPTANCE', 'ORS', 'DV', 'CHECK', 'CLOSED'].includes(currentState);
@@ -127,7 +127,7 @@ export async function submitInspection(formData: FormData) {
     }
 
     if (canFirstTransition) {
-      await assertCanTransition(existing as any, 'INSPECTION' as any);
+      await assertCanTransition(existing, 'INSPECTION' as CaseState);
     }
 
     await prisma.$transaction(async (tx) => {
@@ -148,7 +148,7 @@ export async function submitInspection(formData: FormData) {
       if (canFirstTransition) {
         await tx.procurementCase.update({
           where: { id },
-          data: { currentState: 'INSPECTION' as any },
+          data: { currentState: 'INSPECTION' as CaseState },
         });
       }
     });
@@ -157,8 +157,8 @@ export async function submitInspection(formData: FormData) {
       await logActivity({
         caseId: id,
         action: 'inspection_recorded',
-        fromState: previousState as any,
-        toState: nextState as any,
+        fromState: previousState,
+        toState: nextState as CaseState,
         actorId,
         payload: {
           status: statusValue,
@@ -185,7 +185,7 @@ export async function submitInspection(formData: FormData) {
 export async function submitAcceptance(formData: FormData) {
   'use server';
   try {
-    const authz = await ensureRole(['SUPPLY_MANAGER', 'ADMIN'] as any);
+    const authz = await ensureRole(['SUPPLY_MANAGER', 'ADMIN'] as UserRole[]);
     if (!authz.ok) {
       return { success: false as const, error: 'Not authorized to record acceptance.' as const };
     }
@@ -206,7 +206,7 @@ export async function submitAcceptance(formData: FormData) {
     const existing = await prisma.procurementCase.findUnique({ where: { id } });
     if (!existing) throw new Error('Case not found');
 
-    const currentState = existing.currentState as any;
+    const currentState = existing.currentState as CaseState;
     const previousState = currentState;
     const canFirstTransition = currentState === 'INSPECTION';
     const canEditAcceptance = ['ACCEPTANCE', 'ORS', 'DV', 'CHECK', 'CLOSED'].includes(currentState);
@@ -216,7 +216,7 @@ export async function submitAcceptance(formData: FormData) {
     }
 
     if (canFirstTransition) {
-      await assertCanTransition(existing as any, 'ACCEPTANCE' as any);
+      await assertCanTransition(existing, 'ACCEPTANCE' as CaseState);
     }
 
     await prisma.$transaction(async (tx) => {
@@ -235,7 +235,7 @@ export async function submitAcceptance(formData: FormData) {
       if (canFirstTransition) {
         await tx.procurementCase.update({
           where: { id },
-          data: { currentState: 'ACCEPTANCE' as any },
+          data: { currentState: 'ACCEPTANCE' as CaseState },
         });
       }
     });
@@ -244,8 +244,8 @@ export async function submitAcceptance(formData: FormData) {
       await logActivity({
         caseId: id,
         action: 'acceptance_recorded',
-        fromState: previousState as any,
-        toState: nextState as any,
+        fromState: previousState,
+        toState: nextState as CaseState,
         actorId,
         payload: {
           officer: officerValue,

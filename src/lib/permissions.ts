@@ -56,7 +56,7 @@ const MAP: Record<Action, Role[]> = {
 
 export function canRole(role: Role, action: Action) {
   const allowed = MAP[action] || [];
-  return allowed.includes(role as any);
+  return allowed.includes(role);
 }
 
 export function requiredRoles(action: Action): Role[] {

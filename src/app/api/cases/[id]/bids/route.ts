@@ -6,6 +6,7 @@ import { BidSchema } from '@/lib/validators/bid';
 import { rateLimit, clientIpKey } from '@/lib/rate-limit';
 import { useIdempotencyKey } from '@/lib/idempotency';
 import { assertCanTransition } from '@/lib/workflows/procurement';
+import type { CaseState, UserRole } from '@/generated/prisma';
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -17,7 +18,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const { id: caseId } = await params;
   console.log('=== BID API CALLED ===', { caseId, timestamp: new Date().toISOString() });
   
-  const authz = await ensureRole(['BAC_SECRETARIAT', 'ADMIN'] as any);
+  const authz = await ensureRole(['BAC_SECRETARIAT', 'ADMIN'] as UserRole[]);
   if (!authz.ok) {
     console.error('[BID API] Auth failed:', authz.status);
     return NextResponse.json({ error: 'Forbidden' }, { status: authz.status });
@@ -57,7 +58,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         data: { 
           caseId, 
           bidderName: parsed.data.bidderName, 
-          amount: parsed.data.amount as any, 
+          amount: parsed.data.amount, 
           isResponsive: parsed.data.isResponsive ?? true, 
           openedAt: parsed.data.openedAt ? new Date(parsed.data.openedAt) : null 
         } 
@@ -72,7 +73,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       
       // Check transition (this reads from DB but doesn't modify, so safe in transaction)
       console.log(`[BID API] Checking transition for case ${caseId}, method: ${existing.method}, current state: ${existing.currentState} → BID_SUBMISSION_OPENING`);
-      await assertCanTransition(existing as any, 'BID_SUBMISSION_OPENING' as any);
+      await assertCanTransition(existing, 'BID_SUBMISSION_OPENING' as CaseState);
       
       // Update state within transaction
       console.log(`[BID API] Transition validation passed, updating state...`);

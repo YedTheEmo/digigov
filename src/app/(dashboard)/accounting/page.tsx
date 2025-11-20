@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
 import Link from 'next/link';
+import type { Prisma } from '@/generated/prisma';
+import type { CaseState } from '@/generated/prisma';
 
 const PRE_ACCOUNTING_STATES = ['ORS'] as const;
 const POST_ACCOUNTING_STATES = ['DV', 'CHECK', 'CLOSED'] as const;
@@ -24,7 +26,7 @@ export default async function AccountingPage({
   const { search, state, sort, filter } = params;
 
   // Build Prisma query with filters
-  const where: any = {};
+  const where: Prisma.ProcurementCaseWhereInput = {};
 
   const filterMode = filter || 'pre-accounting'; // pre-accounting or post-accounting
 
@@ -36,17 +38,17 @@ export default async function AccountingPage({
   }
 
   if (state && state !== 'ALL') {
-    where.currentState = state;
+    where.currentState = state as CaseState;
   } else if (filterMode === 'pre-accounting') {
     // Cases ready for Accounting (ORS)
-    where.currentState = { in: PRE_ACCOUNTING_STATES as any };
+    where.currentState = { in: PRE_ACCOUNTING_STATES as CaseState[] };
   } else if (filterMode === 'post-accounting') {
     // Cases that have gone through Accounting (DV and beyond)
-    where.currentState = { in: POST_ACCOUNTING_STATES as any };
+    where.currentState = { in: POST_ACCOUNTING_STATES as CaseState[] };
   }
 
   // Build orderBy
-  let orderBy: any = { updatedAt: 'desc' }; // default
+  let orderBy: Prisma.ProcurementCaseOrderByWithRelationInput = { updatedAt: 'desc' }; // default
   if (sort === 'oldest') {
     orderBy = { createdAt: 'asc' };
   } else if (sort === 'title-asc') {

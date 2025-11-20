@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export interface DropdownProps {
   trigger: React.ReactNode;
@@ -12,8 +12,6 @@ export interface DropdownProps {
 export function Dropdown({ trigger, children, align = 'end', className = '' }: DropdownProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement | null>(null);
-
-  const close = useCallback(() => setOpen(false), []);
 
   useEffect(() => {
     function onDocClick(e: MouseEvent) {

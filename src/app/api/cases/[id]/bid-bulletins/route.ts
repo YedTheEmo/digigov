@@ -5,6 +5,7 @@ import { ensureRole } from '@/lib/authz';
 import { rateLimit, clientIpKey } from '@/lib/rate-limit';
 import { useIdempotencyKey } from '@/lib/idempotency';
 import { assertCanTransition } from '@/lib/workflows/procurement';
+import type { CaseState, UserRole } from '@/generated/prisma';
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -13,7 +14,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 }
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const authz = await ensureRole(['BAC_SECRETARIAT', 'ADMIN'] as any);
+  const authz = await ensureRole(['BAC_SECRETARIAT', 'ADMIN'] as UserRole[]);
   if (!authz.ok) return NextResponse.json({ error: 'Forbidden' }, { status: authz.status });
   const { id: caseId } = await params;
   const rl = await rateLimit(req, clientIpKey(req, 'bid_bulletin'));
@@ -26,7 +27,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const body = await req.json();
   const existing = await prisma.procurementCase.findUnique({ where: { id: caseId } });
   if (!existing) return NextResponse.json({ error: 'Case not found' }, { status: 404 });
-  await assertCanTransition(existing as any, 'BID_BULLETIN' as any);
+  await assertCanTransition(existing, 'BID_BULLETIN' as CaseState);
   const rawNumber = body.number;
   const number =
     rawNumber === undefined || rawNumber === null || rawNumber === ''

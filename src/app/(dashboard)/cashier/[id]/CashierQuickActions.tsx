@@ -5,10 +5,16 @@ import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
+import type { ProcurementCase } from '@/generated/prisma';
+
 type CashierQuickActionsProps = {
-  caseData: any;
-  submitCheck: (formData: FormData) => Promise<any>;
-  submitCheckAdvice: (formData: FormData) => Promise<any>;
+  caseData: ProcurementCase & {
+    check?: { checkNumber: string | null } | null;
+    checkAdvice?: { adviceNumber: string | null } | null;
+    dv?: { dvNumber: string | null } | null;
+  };
+  submitCheck: (formData: FormData) => Promise<{ success: boolean; error?: string }>;
+  submitCheckAdvice: (formData: FormData) => Promise<{ success: boolean; error?: string }>;
 };
 
 export function CashierQuickActions({

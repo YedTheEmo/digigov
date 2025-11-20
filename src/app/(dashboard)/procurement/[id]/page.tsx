@@ -36,11 +36,9 @@ function normalizeDateTimeLocal(value: string | undefined | null): string | unde
 
 export default async function CaseDetail(props: {
   params: Promise<{ id: string }>;
-  searchParams?: Promise<Record<string, any>>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { id } = await props.params;
-  const sp = props.searchParams ? await props.searchParams : undefined;
-  const onlyMine = sp?.only === '1';
   const base =
     process.env.NEXT_PUBLIC_BASE_URL ||
     process.env.BASE_URL ||
@@ -49,25 +47,27 @@ export default async function CaseDetail(props: {
   const userEmail = session?.user?.email;
   const user = userEmail ? await prisma.user.findUnique({ where: { email: userEmail } }) : null;
   const role = (user?.role ?? 'PROCUREMENT_MANAGER') as string;
+  const include: Prisma.ProcurementCaseInclude = {
+    rfq: true, quotations: true, abstract: true, bacResolution: true, award: true,
+    purchaseOrder: true, contract: true, ntp: true, deliveries: true, inspection: true, acceptance: true,
+    ors: true, dv: true, check: true, checkAdvice: true,
+    bidBulletins: true, preBid: true, bids: true, twgEvaluation: true, postQualification: true,
+    progressBilling: true, pmtInspection: true,
+    attachments: true,
+    activityLogs: { orderBy: { createdAt: 'asc' } },
+  };
+
   const c = await prisma.procurementCase.findUnique({
     where: { id },
-    include: {
-      rfq: true, quotations: true, abstract: true, bacResolution: true, award: true,
-      purchaseOrder: true, contract: true, ntp: true, deliveries: true, inspection: true, acceptance: true,
-      ors: true, dv: true, check: true, checkAdvice: true,
-      bidBulletins: true, preBid: true, bids: true, twgEvaluation: true, postQualification: true,
-      progressBilling: true, pmtInspection: true,
-      attachments: true,
-      activityLogs: { orderBy: { createdAt: 'asc' } },
-    } as any,
-  }) as any;
+    include,
+  });
   
   if (!c) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
         <div className="text-6xl mb-4">📋</div>
         <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Case Not Found</h2>
-        <p className="text-gray-600 dark:text-gray-400 mb-6">The procurement case you're looking for doesn't exist.</p>
+        <p className="text-gray-600 dark:text-gray-400 mb-6">The procurement case you&apos;re looking for doesn&apos;t exist.</p>
         <Link href="/procurement">
           <Button variant="primary">Back to Procurement</Button>
         </Link>
@@ -77,8 +77,8 @@ export default async function CaseDetail(props: {
   
   const can = (allowed: string[]) => allowed.includes(role);
   const caseData = JSON.parse(JSON.stringify(c));
-  const nextStepMessage = getNextStepMessage(c.currentState as any);
-  const owner = getCurrentOwner(c.currentState as any);
+  const nextStepMessage = getNextStepMessage(c.currentState as LifecycleStageId);
+  const owner = getCurrentOwner(c.currentState as LifecycleStageId);
 
   async function startPosting(formData: FormData) {
     'use server';
@@ -257,79 +257,6 @@ export default async function CaseDetail(props: {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         error: (error as any)?.message ?? 'Failed to issue NTP',
       };
-    }
-  }
-
-  async function recordDelivery(formData: FormData) {
-    'use server';
-    try {
-      const cookieHeader = await buildCookieHeader();
-      const deliveredAt = normalizeDateTimeLocal(String(formData.get('deliveredAt') || ''));
-      const notes = String(formData.get('notes') || '') || undefined;
-      const res = await fetch(`${base}/api/cases/${id}/deliveries`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Cookie: cookieHeader },
-        body: JSON.stringify({ deliveredAt, notes }),
-      });
-      if (!res.ok) {
-        const message = await res.text().catch(() => res.statusText);
-        return { success: false, error: message || 'Failed to record delivery' };
-      }
-      revalidatePath(`/(dashboard)/procurement/${id}`);
-      return { success: true };
-    } catch (error) {
-      console.error('Failed to record delivery:', error);
-      return {
-        success: false,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        error: (error as any)?.message ?? 'Failed to record delivery',
-      };
-    }
-  }
-
-  async function recordInspection(formData: FormData) {
-    'use server';
-    try {
-      const cookieHeader = await buildCookieHeader();
-      const status = String(formData.get('status') || '') || undefined;
-      const inspector = String(formData.get('inspector') || '') || undefined;
-      const inspectedAt = normalizeDateTimeLocal(String(formData.get('inspectedAt') || ''));
-      const notes = String(formData.get('notes') || '') || undefined;
-      const res = await fetch(`${base}/api/cases/${id}/inspection`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Cookie: cookieHeader },
-        body: JSON.stringify({ status, inspector, inspectedAt, notes }),
-      });
-      if (!res.ok) {
-        const message = await res.text().catch(() => res.statusText);
-        console.error('Failed to record inspection:', message);
-        return;
-      }
-      revalidatePath(`/(dashboard)/procurement/${id}`);
-    } catch (error) {
-      console.error('Failed to record inspection:', error);
-    }
-  }
-
-  async function recordAcceptance(formData: FormData) {
-    'use server';
-    try {
-      const cookieHeader = await buildCookieHeader();
-      const acceptedAt = normalizeDateTimeLocal(String(formData.get('acceptedAt') || ''));
-      const officer = String(formData.get('officer') || '') || undefined;
-      const res = await fetch(`${base}/api/cases/${id}/acceptance`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Cookie: cookieHeader },
-        body: JSON.stringify({ acceptedAt, officer }),
-      });
-      if (!res.ok) {
-        const message = await res.text().catch(() => res.statusText);
-        console.error('Failed to record acceptance:', message);
-        return;
-      }
-      revalidatePath(`/(dashboard)/procurement/${id}`);
-    } catch (error) {
-      console.error('Failed to record acceptance:', error);
     }
   }
 

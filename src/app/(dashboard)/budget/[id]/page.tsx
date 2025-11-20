@@ -1,46 +1,49 @@
 import { prisma } from '@/lib/prisma';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { revalidatePath } from 'next/cache';
 import Link from 'next/link';
 import { CaseHeader } from '@/components/app/CaseHeader';
-import { getCurrentOwner, getNextStepMessage } from '@/lib/casesLifecycle';
+import { getCurrentOwner, getNextStepMessage, type LifecycleStageId } from '@/lib/casesLifecycle';
 import { ORSSchema } from '@/lib/validators/finance';
 import { assertCanTransition } from '@/lib/workflows/procurement';
 import { BudgetDetailTabs } from './BudgetDetailTabs';
 import { BudgetQuickActions } from './BudgetQuickActions';
 import { ensureRole } from '@/lib/authz';
 import { logActivity } from '@/lib/activity';
+import type { Prisma } from '@/generated/prisma';
+import type { CaseState, UserRole } from '@/generated/prisma';
 
 export default async function BudgetCaseDetail(props: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await props.params;
 
+  const include: Prisma.ProcurementCaseInclude = {
+    ors: true,
+    acceptance: true,
+    attachments: true,
+    activityLogs: { orderBy: { createdAt: 'asc' } },
+    // Include related procurement data for context
+    award: true,
+    purchaseOrder: true,
+    contract: true,
+    ntp: true,
+    deliveries: true,
+    inspection: true,
+  };
+
   const c = await prisma.procurementCase.findUnique({
     where: { id },
-    include: {
-      ors: true,
-      acceptance: true,
-      attachments: true,
-      activityLogs: { orderBy: { createdAt: 'asc' } },
-      // Include related procurement data for context
-      award: true,
-      purchaseOrder: true,
-      contract: true,
-      ntp: true,
-      deliveries: true,
-      inspection: true,
-    } as any,
-  }) as any;
+    include,
+  });
 
   if (!c) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
         <div className="text-6xl mb-4">📋</div>
         <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Case Not Found</h2>
-        <p className="text-gray-600 dark:text-gray-400 mb-6">The budget case you're looking for doesn't exist.</p>
+        <p className="text-gray-600 dark:text-gray-400 mb-6">The budget case you&apos;re looking for doesn&apos;t exist.</p>
         <Link href="/budget">
           <Button variant="primary">Back to Budget</Button>
         </Link>
@@ -49,13 +52,13 @@ export default async function BudgetCaseDetail(props: {
   }
 
   const caseData = JSON.parse(JSON.stringify(c));
-  const nextStepMessage = getNextStepMessage(c.currentState as any);
-  const owner = getCurrentOwner(c.currentState as any);
+  const nextStepMessage = getNextStepMessage(c.currentState as LifecycleStageId);
+  const owner = getCurrentOwner(c.currentState as LifecycleStageId);
 
   async function submitORS(formData: FormData) {
     'use server';
     try {
-      const authz = await ensureRole(['BUDGET_MANAGER', 'ADMIN'] as any);
+      const authz = await ensureRole(['BUDGET_MANAGER', 'ADMIN'] as UserRole[]);
       if (!authz.ok) {
         return { success: false, error: 'Not authorized to submit ORS.' };
       }
@@ -83,9 +86,9 @@ export default async function BudgetCaseDetail(props: {
           error: 'Case not found',
         };
       }
-      const previousState = existing.currentState as any;
+      const previousState = existing.currentState as CaseState;
 
-      await assertCanTransition(existing as any, 'ORS' as any);
+      await assertCanTransition(existing, 'ORS' as CaseState);
 
       await prisma.$transaction(async (tx) => {
         await tx.oRS.upsert({
@@ -106,7 +109,7 @@ export default async function BudgetCaseDetail(props: {
         });
         await tx.procurementCase.update({
           where: { id },
-          data: { currentState: 'ORS' as any },
+          data: { currentState: 'ORS' as CaseState },
         });
       });
       try {
@@ -114,7 +117,7 @@ export default async function BudgetCaseDetail(props: {
           caseId: id,
           action: 'ors_recorded',
           fromState: previousState,
-          toState: 'ORS' as any,
+          toState: 'ORS' as CaseState,
           actorId,
           payload: {
             orsNumber: parsed.data.orsNumber ?? null,

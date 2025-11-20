@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/select';
 import { ACTION_FILTERS, getActionMeta } from '@/lib/activityLabels';
 import { getStateVariant } from '@/lib/casesLifecycle';
+import type { Prisma } from '@/generated/prisma';
 
 export default async function LogsPage(props: {
   searchParams: Promise<{ q?: string; action?: string; page?: string }>;
@@ -19,7 +20,7 @@ export default async function LogsPage(props: {
   const page = Math.max(1, Number.isNaN(Number(pageParam)) ? 1 : Number(pageParam || 1));
   const pageSize = 50;
 
-  const where: any = {};
+  const where: Prisma.ActivityLogWhereInput = {};
 
   if (q) {
     // Check if it looks like a UUID (case ID)

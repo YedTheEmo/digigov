@@ -4,6 +4,8 @@ import { Badge } from '@/components/ui/badge';
 import { Table, THead, TBody, TR, TH, TD } from '@/components/ui/table';
 import { EmptyState } from '@/components/ui/empty-state';
 import Link from 'next/link';
+import type { Prisma } from '@/generated/prisma';
+import type { Quotation } from '@/generated/prisma';
 
 export default async function AbstractPage({
   params,
@@ -12,12 +14,14 @@ export default async function AbstractPage({
 }) {
   const { id } = await params;
 
+  const include: Prisma.ProcurementCaseInclude = {
+    quotations: true,
+    abstract: true,
+  };
+
   const c = await prisma.procurementCase.findUnique({
     where: { id },
-    include: {
-      quotations: true,
-      abstract: true,
-    } as any,
+    include,
   });
 
   if (!c) {
@@ -162,7 +166,7 @@ export default async function AbstractPage({
                 </TR>
               </THead>
               <TBody>
-                {quotations.map((q: any, index: number) => (
+                {quotations.map((q: Quotation, index: number) => (
                   <TR key={q.id} hover={false}>
                     <TD className="w-24">
                       <div className="flex items-center gap-2">

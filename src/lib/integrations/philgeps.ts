@@ -20,7 +20,8 @@
     if (!res.ok) return { ok: false, message: `HTTP ${res.status}` } as const;
     const data = await res.json().catch(() => ({}));
     return { ok: true, reference: data?.reference ?? null } as const;
-  } catch (e: any) {
-    return { ok: false, message: e.message } as const;
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : 'Unknown error';
+    return { ok: false, message } as const;
   }
 }

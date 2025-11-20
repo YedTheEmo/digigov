@@ -6,9 +6,10 @@ import { InspectionSchema } from '@/lib/validators/post_award';
 import { rateLimit, clientIpKey } from '@/lib/rate-limit';
 import { useIdempotencyKey } from '@/lib/idempotency';
 import { assertCanTransition } from '@/lib/workflows/procurement';
+import type { CaseState, UserRole } from '@/generated/prisma';
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const authz = await ensureRole(['SUPPLY_MANAGER', 'ADMIN'] as any);
+  const authz = await ensureRole(['SUPPLY_MANAGER', 'ADMIN'] as UserRole[]);
   if (!authz.ok) return NextResponse.json({ error: 'Forbidden' }, { status: authz.status });
   const { id: caseId } = await params;
   const rl = await rateLimit(req, clientIpKey(req, 'inspection'));
@@ -30,7 +31,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const existing = await prisma.procurementCase.findUnique({ where: { id: caseId } });
   if (!existing) return NextResponse.json({ error: 'Case not found' }, { status: 404 });
 
-  const currentState = existing.currentState as any;
+  const currentState = existing.currentState as CaseState;
   const canFirstTransition = currentState === 'DELIVERY';
   const canEditInspection = ['INSPECTION', 'ACCEPTANCE', 'ORS', 'DV', 'CHECK', 'CLOSED'].includes(currentState);
 
@@ -43,7 +44,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   if (canFirstTransition) {
     try {
-      await assertCanTransition(existing as any, 'INSPECTION' as any);
+      await assertCanTransition(existing, 'INSPECTION' as CaseState);
     } catch (error) {
       return NextResponse.json(
         { error: (error as Error).message || 'Transition not allowed' },
@@ -80,15 +81,15 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   if (canFirstTransition) {
     await prisma.procurementCase.update({
       where: { id: caseId },
-      data: { currentState: 'INSPECTION' as any },
+      data: { currentState: 'INSPECTION' as CaseState },
     });
   }
 
   await logActivity({
     caseId,
     action: 'inspection',
-    fromState: existing.currentState as any,
-    toState: (canFirstTransition ? 'INSPECTION' : existing.currentState) as any,
+    fromState: existing.currentState,
+    toState: (canFirstTransition ? 'INSPECTION' : existing.currentState) as CaseState,
     legalBasis: 'COA & End-User Inspection',
   });
 

@@ -6,9 +6,10 @@ import { RFQSchema } from '@/lib/validators/rfq';
 import { rateLimit, clientIpKey } from '@/lib/rate-limit';
 import { useIdempotencyKey } from '@/lib/idempotency';
 import { assertCanTransition } from '@/lib/workflows/procurement';
+import type { CaseState, UserRole } from '@/generated/prisma';
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const authz = await ensureRole(['PROCUREMENT_MANAGER', 'BAC_SECRETARIAT', 'ADMIN'] as any);
+  const authz = await ensureRole(['PROCUREMENT_MANAGER', 'BAC_SECRETARIAT', 'ADMIN'] as UserRole[]);
   if (!authz.ok) return NextResponse.json({ error: 'Forbidden' }, { status: authz.status });
 
   const rl = await rateLimit(req, clientIpKey(req, 'rfq'));
@@ -33,7 +34,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const caseExisting = await prisma.procurementCase.findUnique({ where: { id: caseId } });
   if (!caseExisting) return NextResponse.json({ error: 'Case not found' }, { status: 404 });
 
-  await assertCanTransition(caseExisting as any, 'RFQ_ISSUED' as any);
+  await assertCanTransition(caseExisting, 'RFQ_ISSUED' as CaseState);
 
   const existingRFQ = await prisma.rFQ.findUnique({ where: { caseId } });
   if (existingRFQ) return NextResponse.json(existingRFQ);
@@ -48,14 +49,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     await tx.procurementCase.update({
       where: { id: caseId },
-      data: { currentState: 'RFQ_ISSUED' as any },
+      data: { currentState: 'RFQ_ISSUED' as CaseState },
     });
 
     await logActivity({
       caseId,
       action: 'issue_rfq',
-      fromState: caseExisting.currentState as any,
-      toState: 'RFQ_ISSUED' as any,
+      fromState: caseExisting.currentState,
+      toState: 'RFQ_ISSUED' as CaseState,
     });
 
     return created;

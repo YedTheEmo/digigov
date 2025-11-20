@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
 import Link from 'next/link';
+import type { Prisma } from '@/generated/prisma';
+import type { CaseState } from '@/generated/prisma';
 
 const SUPPLY_STATES = [
   'NTP_ISSUED',
@@ -35,7 +37,7 @@ export default async function SupplyPage({
   const { search, state, sort, filter } = params;
 
   // Build Prisma query with filters
-  const where: any = {};
+  const where: Prisma.ProcurementCaseWhereInput = {};
 
   const filterMode = filter || 'pre-supply'; // pre-supply or post-supply
 
@@ -47,17 +49,17 @@ export default async function SupplyPage({
   }
 
   if (state && state !== 'ALL') {
-    where.currentState = state;
+    where.currentState = state as CaseState;
   } else if (filterMode === 'pre-supply') {
     // Cases ready for Supply (NTP_ISSUED) or currently in Supply stages
-    where.currentState = { in: SUPPLY_STATES as any };
+    where.currentState = { in: SUPPLY_STATES as CaseState[] };
   } else if (filterMode === 'post-supply') {
     // Cases that have gone through Supply (ACCEPTANCE and beyond)
-    where.currentState = { in: POST_SUPPLY_STATES as any };
+    where.currentState = { in: POST_SUPPLY_STATES as CaseState[] };
   }
 
   // Build orderBy
-  let orderBy: any = { updatedAt: 'desc' }; // default
+  let orderBy: Prisma.ProcurementCaseOrderByWithRelationInput = { updatedAt: 'desc' }; // default
   if (sort === 'oldest') {
     orderBy = { createdAt: 'asc' };
   } else if (sort === 'title-asc') {

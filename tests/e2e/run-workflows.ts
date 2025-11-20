@@ -1,4 +1,4 @@
-import { ApiClient, expectStatus, idempotencyKey } from './http';
+import { ApiClient, idempotencyKey } from './http';
 
 type Clients = {
   admin: ApiClient;
@@ -50,7 +50,6 @@ async function loginAll(): Promise<Clients> {
 async function waitForServerReady(timeoutMs = 30000) {
   const start = Date.now();
   const client = new ApiClient(BASE_URL);
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     try {
       const res = await client.get('/api/cases?query=_health');
@@ -499,11 +498,11 @@ async function main() {
   await waitForServerReady();
   const clients = await loginAll();
   let failed = 0;
-  try { await publicBiddingFlow(clients); } catch (e: any) { failed++; logStep('Public Bidding Flow', false, e.message); }
-  try { await rfqFlow(clients); } catch (e: any) { failed++; logStep('RFQ Flow', false, e.message); }
-  try { await attachmentsTest(clients); } catch (e: any) { failed++; logStep('Attachments', false, e.message); }
-  try { await negativeTests(clients); } catch (e: any) { failed++; logStep('Negative Tests', false, e.message); }
-  try { await infraFlow(clients); } catch (e: any) { failed++; logStep('Infrastructure Flow', false, e.message); }
+  try { await publicBiddingFlow(clients); } catch (e: unknown) { failed++; logStep('Public Bidding Flow', false, e instanceof Error ? e.message : String(e)); }
+  try { await rfqFlow(clients); } catch (e: unknown) { failed++; logStep('RFQ Flow', false, e instanceof Error ? e.message : String(e)); }
+  try { await attachmentsTest(clients); } catch (e: unknown) { failed++; logStep('Attachments', false, e instanceof Error ? e.message : String(e)); }
+  try { await negativeTests(clients); } catch (e: unknown) { failed++; logStep('Negative Tests', false, e instanceof Error ? e.message : String(e)); }
+  try { await infraFlow(clients); } catch (e: unknown) { failed++; logStep('Infrastructure Flow', false, e instanceof Error ? e.message : String(e)); }
   if (failed > 0) {
     console.error(`\n${failed} scenario(s) failed`);
     process.exit(1);

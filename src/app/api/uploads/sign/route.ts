@@ -5,7 +5,7 @@ import { rateLimit, clientIpKey } from '@/lib/rate-limit';
 import { ensureRole } from '@/lib/authz';
 
 export async function POST(req: NextRequest) {
-  const authz = await ensureRole(['ADMIN', 'PROCUREMENT_MANAGER', 'SUPPLY_MANAGER', 'BUDGET_MANAGER', 'ACCOUNTING_MANAGER', 'CASHIER_MANAGER', 'BAC_SECRETARIAT', 'TWG_MEMBER'] as any);
+  const authz = await ensureRole(['ADMIN', 'PROCUREMENT_MANAGER', 'SUPPLY_MANAGER', 'BUDGET_MANAGER', 'ACCOUNTING_MANAGER', 'CASHIER_MANAGER', 'BAC_SECRETARIAT', 'TWG_MEMBER']);
   if (!authz.ok) return NextResponse.json({ error: 'Forbidden' }, { status: authz.status });
   const rl = await rateLimit(req, clientIpKey(req, 'uploads_sign'));
   if (!rl.ok) return NextResponse.json({ error: 'Rate limited' }, { status: 429 });

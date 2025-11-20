@@ -1,22 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { logActivity } from '@/lib/activity';
+import type { Prisma } from '@/generated/prisma';
+import type { CaseState } from '@/generated/prisma';
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const status = url.searchParams.get('status');
   const query = url.searchParams.get('query');
-  const section = url.searchParams.get('section');
   const limitParam = url.searchParams.get('limit');
   const offsetParam = url.searchParams.get('offset');
   const take = limitParam ? Math.min(Math.max(parseInt(limitParam, 10) || 0, 1), 100) : undefined;
   const skip = offsetParam ? Math.max(parseInt(offsetParam, 10) || 0, 0) : undefined;
 
-  const where: any = {};
-  if (status) where.currentState = status as any;
+  const where: Prisma.ProcurementCaseWhereInput = {};
+  if (status) where.currentState = status as CaseState;
   if (query && query.trim().length > 0) {
     where.OR = [
-      { title: { contains: query, mode: 'insensitive' as any } },
+      { title: { contains: query, mode: 'insensitive' } },
       { id: query },
     ];
   }

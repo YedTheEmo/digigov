@@ -7,9 +7,10 @@ import { useIdempotencyKey } from '../../../../../lib/idempotency';
 import { sendEmail } from '@/lib/notifications/resend';
 import { ensureRole } from '@/lib/authz';
 import { assertCanTransition } from '@/lib/workflows/procurement';
+import type { CaseState, UserRole } from '@/generated/prisma';
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const authz = await ensureRole(['PROCUREMENT_MANAGER', 'ADMIN'] as any);
+  const authz = await ensureRole(['PROCUREMENT_MANAGER', 'ADMIN'] as UserRole[]);
   if (!authz.ok) return NextResponse.json({ error: 'Forbidden' }, { status: authz.status });
 
   const rl = await rateLimit(req, clientIpKey(req, 'ntp'));
@@ -35,7 +36,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   if (!existing) return NextResponse.json({ error: 'Case not found' }, { status: 404 });
 
   try {
-    await assertCanTransition(existing as any, 'NTP_ISSUED' as any);
+    await assertCanTransition(existing, 'NTP_ISSUED' as CaseState);
   } catch (error) {
     return NextResponse.json(
       { error: (error as Error).message || 'Transition not allowed' },
@@ -62,7 +63,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   await prisma.procurementCase.update({
     where: { id: caseId },
-    data: { currentState: 'NTP_ISSUED' as any, deliveryDueAt },
+    data: { currentState: 'NTP_ISSUED' as CaseState, deliveryDueAt },
   });
 
   await prisma.reminder.upsert({
@@ -74,8 +75,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   await logActivity({
     caseId,
     action: 'ntp_issued',
-    fromState: existing.currentState as any,
-    toState: 'NTP_ISSUED' as any,
+    fromState: existing.currentState,
+    toState: 'NTP_ISSUED' as CaseState,
   });
 
   await sendEmail({

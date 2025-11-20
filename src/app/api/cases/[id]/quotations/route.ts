@@ -6,6 +6,7 @@ import { QuotationSchema } from '@/lib/validators/quotation';
 import { rateLimit, clientIpKey } from '@/lib/rate-limit';
 import { useIdempotencyKey } from '@/lib/idempotency';
 import { assertCanTransition } from '@/lib/workflows/procurement';
+import type { CaseState, UserRole } from '@/generated/prisma';
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -17,7 +18,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 }
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const authz = await ensureRole(['PROCUREMENT_MANAGER', 'BAC_SECRETARIAT', 'ADMIN'] as any);
+  const authz = await ensureRole(['PROCUREMENT_MANAGER', 'BAC_SECRETARIAT', 'ADMIN'] as UserRole[]);
   if (!authz.ok) return NextResponse.json({ error: 'Forbidden' }, { status: authz.status });
 
   const { id: caseId } = await params;
@@ -45,7 +46,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   let shouldEnterCollection = false;
   if (existingCase.currentState === 'RFQ_ISSUED') {
     try {
-      await assertCanTransition(existingCase as any, 'QUOTATION_COLLECTION' as any);
+      await assertCanTransition(existingCase, 'QUOTATION_COLLECTION' as CaseState);
       shouldEnterCollection = true;
     } catch (error) {
       return NextResponse.json(
@@ -59,7 +60,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     data: {
       caseId,
       supplierName: parsed.data.supplierName,
-      amount: parsed.data.amount as any,
+      amount: parsed.data.amount,
       isResponsive: parsed.data.isResponsive ?? true,
     },
   });
@@ -67,14 +68,14 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   if (shouldEnterCollection) {
     await prisma.procurementCase.update({
       where: { id: caseId },
-      data: { currentState: 'QUOTATION_COLLECTION' as any },
+      data: { currentState: 'QUOTATION_COLLECTION' as CaseState },
     });
 
     await logActivity({
       caseId,
       action: 'start_quotation_collection',
-      fromState: existingCase.currentState as any,
-      toState: 'QUOTATION_COLLECTION' as any,
+      fromState: existingCase.currentState,
+      toState: 'QUOTATION_COLLECTION' as CaseState,
     });
   }
 

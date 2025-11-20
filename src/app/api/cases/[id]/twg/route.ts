@@ -6,9 +6,10 @@ import { TWGSchema } from '@/lib/validators/twg';
 import { rateLimit, clientIpKey } from '@/lib/rate-limit';
 import { useIdempotencyKey } from '@/lib/idempotency';
 import { assertCanTransition } from '@/lib/workflows/procurement';
+import type { CaseState, UserRole } from '@/generated/prisma';
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const authz = await ensureRole(['TWG_MEMBER', 'ADMIN'] as any);
+  const authz = await ensureRole(['TWG_MEMBER', 'ADMIN'] as UserRole[]);
   if (!authz.ok) return NextResponse.json({ error: 'Forbidden' }, { status: authz.status });
   const { id: caseId } = await params;
   const json = await req.json();
@@ -28,7 +29,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   });
   const existing = await prisma.procurementCase.findUnique({ where: { id: caseId } });
   if (!existing) return NextResponse.json({ error: 'Case not found' }, { status: 404 });
-  await assertCanTransition(existing as any, 'TWG_EVALUATION' as any);
+  await assertCanTransition(existing, 'TWG_EVALUATION' as CaseState);
   await prisma.procurementCase.update({ where: { id: caseId }, data: { currentState: 'TWG_EVALUATION' } });
   await logActivity({ caseId, action: 'twg_evaluation', toState: 'TWG_EVALUATION', legalBasis: 'RA 9184 IRR Sec. 30-34 (Bid Eval)' });
   return NextResponse.json(created, { status: 201 });

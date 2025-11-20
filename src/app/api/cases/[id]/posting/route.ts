@@ -7,9 +7,10 @@ import { PostingSchema } from '@/lib/validators/posting';
 import { rateLimit, clientIpKey } from '@/lib/rate-limit';
 import { useIdempotencyKey } from '@/lib/idempotency';
 import { assertCanTransition } from '@/lib/workflows/procurement';
+import type { CaseState, UserRole } from '@/generated/prisma';
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const authz = await ensureRole(['PROCUREMENT_MANAGER', 'BAC_SECRETARIAT', 'ADMIN'] as any);
+  const authz = await ensureRole(['PROCUREMENT_MANAGER', 'BAC_SECRETARIAT', 'ADMIN'] as UserRole[]);
   if (!authz.ok) return NextResponse.json({ error: 'Forbidden' }, { status: authz.status });
   const { id: caseId } = await params;
   const rl = await rateLimit(req, clientIpKey(req, 'posting'));
@@ -24,7 +25,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   const existing = await prisma.procurementCase.findUnique({ where: { id: caseId } });
   if (!existing) return NextResponse.json({ error: 'Case not found' }, { status: 404 });
-  await assertCanTransition(existing as any, 'POSTING' as any);
+  await assertCanTransition(existing, 'POSTING' as CaseState);
 
   const postingStartAt = parsed.data.postingStartAt ? new Date(parsed.data.postingStartAt) : new Date();
   const postingEndAt = parsed.data.postingEndAt ? new Date(parsed.data.postingEndAt) : new Date(postingStartAt.getTime() + 7 * 24 * 60 * 60 * 1000);
@@ -55,19 +56,19 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     data: {
       caseId,
       action: 'posting',
-      fromState: existing.currentState as any,
-      toState: 'POSTING',
-      legalBasis: getLegalBasis('posting', existing.method as any, existing.regime as any),
+      fromState: existing.currentState,
+      toState: 'POSTING' as CaseState,
+      legalBasis: getLegalBasis('posting'),
       payload: { publish },
     },
   });
 
-  if ((publish as any).ok && (publish as any).reference) {
+  if ('ok' in publish && publish.ok && 'reference' in publish && publish.reference) {
     await prisma.attachment.create({
       data: {
         caseId,
         type: 'PHILGEPS_REFERENCE',
-        url: String((publish as any).reference),
+        url: String('reference' in publish ? publish.reference : ''),
         uploadedBy: null,
       },
     });

@@ -4,43 +4,47 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { revalidatePath } from 'next/cache';
 import Link from 'next/link';
 import { CaseHeader } from '@/components/app/CaseHeader';
-import { getCurrentOwner, getNextStepMessage } from '@/lib/casesLifecycle';
+import { getCurrentOwner, getNextStepMessage, type LifecycleStageId } from '@/lib/casesLifecycle';
 import { DVSchema } from '@/lib/validators/finance';
 import { assertCanTransition } from '@/lib/workflows/procurement';
 import { AccountingDetailTabs } from './AccountingDetailTabs';
 import { AccountingQuickActions } from './AccountingQuickActions';
 import { ensureRole } from '@/lib/authz';
 import { logActivity } from '@/lib/activity';
+import type { Prisma } from '@/generated/prisma';
+import type { CaseState, UserRole } from '@/generated/prisma';
 
 export default async function AccountingCaseDetail(props: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await props.params;
 
+  const include: Prisma.ProcurementCaseInclude = {
+    dv: true,
+    ors: true,
+    attachments: true,
+    activityLogs: { orderBy: { createdAt: 'asc' } },
+    // Include related procurement data for context
+    award: true,
+    purchaseOrder: true,
+    contract: true,
+    ntp: true,
+    deliveries: true,
+    inspection: true,
+    acceptance: true,
+  };
+
   const c = await prisma.procurementCase.findUnique({
     where: { id },
-    include: {
-      dv: true,
-      ors: true,
-      attachments: true,
-      activityLogs: { orderBy: { createdAt: 'asc' } },
-      // Include related procurement data for context
-      award: true,
-      purchaseOrder: true,
-      contract: true,
-      ntp: true,
-      deliveries: true,
-      inspection: true,
-      acceptance: true,
-    } as any,
-  }) as any;
+    include,
+  });
 
   if (!c) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
         <div className="text-6xl mb-4">📋</div>
         <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Case Not Found</h2>
-        <p className="text-gray-600 dark:text-gray-400 mb-6">The accounting case you're looking for doesn't exist.</p>
+        <p className="text-gray-600 dark:text-gray-400 mb-6">The accounting case you&apos;re looking for doesn&apos;t exist.</p>
         <Link href="/accounting">
           <Button variant="primary">Back to Accounting</Button>
         </Link>
@@ -49,13 +53,13 @@ export default async function AccountingCaseDetail(props: {
   }
 
   const caseData = JSON.parse(JSON.stringify(c));
-  const nextStepMessage = getNextStepMessage(c.currentState as any);
-  const owner = getCurrentOwner(c.currentState as any);
+  const nextStepMessage = getNextStepMessage(c.currentState as LifecycleStageId);
+  const owner = getCurrentOwner(c.currentState as LifecycleStageId);
 
   async function submitDV(formData: FormData) {
     'use server';
     try {
-      const authz = await ensureRole(['ACCOUNTING_MANAGER', 'ADMIN'] as any);
+      const authz = await ensureRole(['ACCOUNTING_MANAGER', 'ADMIN'] as UserRole[]);
       if (!authz.ok) {
         return { success: false, error: 'Not authorized to submit DV.' };
       }
@@ -83,9 +87,9 @@ export default async function AccountingCaseDetail(props: {
           error: 'Case not found',
         };
       }
-      const previousState = existing.currentState as any;
+      const previousState = existing.currentState as CaseState;
 
-      await assertCanTransition(existing as any, 'DV' as any);
+      await assertCanTransition(existing, 'DV' as CaseState);
 
       await prisma.$transaction(async (tx) => {
         await tx.dV.upsert({
@@ -106,7 +110,7 @@ export default async function AccountingCaseDetail(props: {
         });
         await tx.procurementCase.update({
           where: { id },
-          data: { currentState: 'DV' as any },
+          data: { currentState: 'DV' as CaseState },
         });
       });
       try {
@@ -114,7 +118,7 @@ export default async function AccountingCaseDetail(props: {
           caseId: id,
           action: 'dv_recorded',
           fromState: previousState,
-          toState: 'DV' as any,
+          toState: 'DV' as CaseState,
           actorId,
           payload: {
             dvNumber: parsed.data.dvNumber ?? null,

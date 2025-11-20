@@ -32,13 +32,13 @@ export class ApiClient {
   }
 
   private async request(method: string, path: string, opts?: {
-    json?: any;
+    json?: unknown;
     form?: URLSearchParams;
     headers?: HeadersInit;
   }) {
     const url = `${this.baseUrl}${path}`;
     const headers: HeadersInit = { 'Accept': 'application/json', ...(opts?.headers || {}) };
-    let body: any = undefined;
+    let body: string | undefined = undefined;
     if (opts?.json !== undefined) {
       headers['Content-Type'] = 'application/json';
       body = JSON.stringify(opts.json);
@@ -49,10 +49,10 @@ export class ApiClient {
     }
     const cookieHeader = this.jar.header();
     if (cookieHeader) headers['Cookie'] = cookieHeader;
-    const res = await fetch(url, { method, headers, body, redirect: 'manual' as any });
+    const res = await fetch(url, { method, headers, body, redirect: 'manual' });
     const setCookie = res.headers.getSetCookie?.() ?? res.headers.get('set-cookie')?.split(/,(?=[^ ;]+?=)/g) ?? null;
     this.jar.setFromSetCookie(Array.isArray(setCookie) ? setCookie : setCookie ? [setCookie] : null);
-    let data: any = null;
+    let data: unknown = null;
     const text = await res.text().catch(() => '');
     try { data = text ? JSON.parse(text) : null; } catch { data = text; }
     return { status: res.status, ok: res.ok, headers: res.headers, data, text };
@@ -61,7 +61,7 @@ export class ApiClient {
   get(path: string, headers?: HeadersInit) {
     return this.request('GET', path, { headers });
   }
-  post(path: string, json?: any, headers?: HeadersInit) {
+  post(path: string, json?: unknown, headers?: HeadersInit) {
     return this.request('POST', path, { json, headers });
   }
   postForm(path: string, form: URLSearchParams, headers?: HeadersInit) {
@@ -94,7 +94,7 @@ export class ApiClient {
     const res = await this.get(`/api/cases?query=${encodeURIComponent(id)}`);
     if (!res.ok) throw new Error(`Fetch case failed (${res.status})`);
     const arr = Array.isArray(res.data) ? res.data : [];
-    const found = arr.find((c: any) => c.id === id) || arr[0];
+    const found = arr.find((c: { id?: string }) => c.id === id) || arr[0];
     if (!found) throw new Error('Case not found in response');
     return found;
   }
@@ -105,7 +105,8 @@ export function expectStatus(actual: number, expected: number, context: string) 
 }
 
 export function idempotencyKey(suffix?: string) {
-  const base = (globalThis as any).crypto?.randomUUID ? (globalThis as any).crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
+  const crypto = globalThis.crypto;
+  const base = crypto?.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
   return suffix ? `${base}-${suffix}` : base;
 }
 

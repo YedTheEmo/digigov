@@ -7,16 +7,18 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 
+import type { ProcurementCase, Quotation, Bid } from '@/generated/prisma';
+
 type QuickActionsProps = {
-  caseData: any;
+  caseData: ProcurementCase;
   role: string;
-  startPosting: (formData: FormData) => Promise<any>;
-  issueRFQ: (formData: FormData) => Promise<any>;
-  submitAward: (formData: FormData) => Promise<any>;
-  approvePO: (formData: FormData) => Promise<any>;
-  signContract: (formData: FormData) => Promise<any>;
-  issueNTP: (formData: FormData) => Promise<any>;
-  recordBACResolution: (formData: FormData) => Promise<any>;
+  startPosting: (formData: FormData) => Promise<{ success: boolean; error?: string }>;
+  issueRFQ: (formData: FormData) => Promise<{ success: boolean; error?: string }>;
+  submitAward: (formData: FormData) => Promise<{ success: boolean; error?: string }>;
+  approvePO: (formData: FormData) => Promise<{ success: boolean; error?: string }>;
+  signContract: (formData: FormData) => Promise<{ success: boolean; error?: string }>;
+  issueNTP: (formData: FormData) => Promise<{ success: boolean; error?: string }>;
+  recordBACResolution: (formData: FormData) => Promise<{ success: boolean; error?: string }>;
 };
 
 function can(role: string, allowed: string[]) {
@@ -63,7 +65,7 @@ export function QuickActions({
   };
 
   const makeHandler =
-    (action: (fd: FormData) => Promise<any>, successMessage: string) =>
+    (action: (fd: FormData) => Promise<{ success: boolean; error?: string }>, successMessage: string) =>
       async (formData: FormData) => {
         startTransition(async () => {
           const res = await action(formData);
@@ -223,12 +225,12 @@ export function QuickActions({
           <form action={handleSubmitAward} className="flex items-center gap-2">
             <Select name="awardedTo" className="w-[250px]">
               <option value="" disabled selected>Select Supplier</option>
-              {c.quotations?.map((q: any) => (
+              {c.quotations?.map((q: Quotation) => (
                 <option key={q.id} value={q.supplierName}>
                   {q.supplierName} - {q.amount}
                 </option>
               ))}
-              {c.bids?.map((b: any) => (
+              {c.bids?.map((b: Bid) => (
                 <option key={b.id} value={b.bidderName}>
                   {b.bidderName} - {b.amount}
                 </option>

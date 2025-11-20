@@ -8,6 +8,7 @@ import { Uploader } from '@/app/(dashboard)/procurement/[id]/Uploader';
 import { getActionMeta } from '@/lib/activityLabels';
 import { getAttachmentDisplayName } from '@/lib/attachments';
 import { ProgressStages } from '@/components/app/ProgressStages';
+import type { ProcurementCase, ActivityLog, Attachment, ORS, DV } from '@/generated/prisma';
 
 type CaseStateVariant = 'completed' | 'cancelled' | 'pending' | 'info' | 'warning';
 
@@ -18,7 +19,14 @@ function getStateVariantLocal(state: string): CaseStateVariant {
   return 'info';
 }
 
-export function AccountingDetailTabs({ caseData, caseId }: { caseData: any; caseId: string }) {
+type AccountingCaseData = ProcurementCase & {
+  ors?: ORS | null;
+  dv?: DV | null;
+  attachments?: Attachment[];
+  activityLogs?: ActivityLog[];
+};
+
+export function AccountingDetailTabs({ caseData, caseId }: { caseData: AccountingCaseData; caseId: string }) {
   return (
     <Tabs defaultValue="overview">
       <TabsList>
@@ -112,14 +120,14 @@ export function AccountingDetailTabs({ caseData, caseId }: { caseData: any; case
           <CardContent>
             {(() => {
               // Filter activity logs to show only accounting-related activities
-              const accountingLogs = caseData.activityLogs?.filter((log: any) => {
+              const accountingLogs = caseData.activityLogs?.filter((log: ActivityLog) => {
                 const meta = getActionMeta(log.action);
                 return meta.category === 'accounting' || log.action === 'dv_recorded' || log.toState === 'DV';
               }) || [];
               
               return accountingLogs.length > 0 ? (
                 <div className="space-y-4">
-                  {accountingLogs.map((log: any, index: number) => (
+                  {accountingLogs.map((log: ActivityLog, index: number) => (
                     <div key={log.id} className="flex gap-4">
                       <div className="flex flex-col items-center">
                         <div className="w-3 h-3 rounded-full bg-blue-600 dark:bg-blue-500"></div>
@@ -218,7 +226,7 @@ export function AccountingDetailTabs({ caseData, caseId }: { caseData: any; case
               
               {caseData.attachments?.length > 0 ? (
                 <div className="space-y-2">
-                  {caseData.attachments.map((attachment: any) => (
+                  {caseData.attachments.map((attachment: Attachment) => (
                     <div
                       key={attachment.id}
                       className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"

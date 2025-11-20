@@ -5,9 +5,14 @@ import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
+import type { ProcurementCase } from '@/generated/prisma';
+
 type BudgetQuickActionsProps = {
-  caseData: any;
-  submitORS: (formData: FormData) => Promise<any>;
+  caseData: ProcurementCase & {
+    ors?: { orsNumber: string | null } | null;
+    acceptance?: { acceptedAt: Date | null } | null;
+  };
+  submitORS: (formData: FormData) => Promise<{ success: boolean; error?: string }>;
 };
 
 export function BudgetQuickActions({

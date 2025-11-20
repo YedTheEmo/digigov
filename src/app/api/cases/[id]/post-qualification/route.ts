@@ -5,9 +5,10 @@ import { PostQualificationSchema } from '@/lib/validators/post-qualification';
 import { rateLimit, clientIpKey } from '@/lib/rate-limit';
 import { useIdempotencyKey } from '@/lib/idempotency';
 import { transitionCaseState } from '@/lib/workflows/procurement';
+import type { CaseState, UserRole } from '@/generated/prisma';
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const authz = await ensureRole(['BAC_SECRETARIAT', 'ADMIN'] as any);
+  const authz = await ensureRole(['BAC_SECRETARIAT', 'ADMIN'] as UserRole[]);
   if (!authz.ok) return NextResponse.json({ error: 'Forbidden' }, { status: authz.status });
   const { id: caseId } = await params;
   const json = await req.json();
@@ -25,7 +26,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     update: { lowestResponsiveBidder: parsed.data.lowestResponsiveBidder ?? null, passed: parsed.data.passed ?? null, notes: parsed.data.notes ?? null, completedAt: parsed.data.completedAt ? new Date(parsed.data.completedAt) : new Date() },
     create: { caseId, lowestResponsiveBidder: parsed.data.lowestResponsiveBidder ?? null, passed: parsed.data.passed ?? null, notes: parsed.data.notes ?? null, completedAt: parsed.data.completedAt ? new Date(parsed.data.completedAt) : new Date() },
   });
-  await transitionCaseState(caseId, 'POST_QUALIFICATION' as any, {
+  await transitionCaseState(caseId, 'POST_QUALIFICATION' as CaseState, {
     action: 'post_qualification',
     legalBasis: 'RA 9184 IRR Sec. 34 (Post-Qualification)',
   });

@@ -4,45 +4,49 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { revalidatePath } from 'next/cache';
 import Link from 'next/link';
 import { CaseHeader } from '@/components/app/CaseHeader';
-import { getCurrentOwner, getNextStepMessage } from '@/lib/casesLifecycle';
+import { getCurrentOwner, getNextStepMessage, type LifecycleStageId } from '@/lib/casesLifecycle';
 import { CheckAdviceSchema, CheckSchema } from '@/lib/validators/finance';
 import { assertCanTransition } from '@/lib/workflows/procurement';
 import { CashierDetailTabs } from './CashierDetailTabs';
 import { CashierQuickActions } from './CashierQuickActions';
 import { ensureRole } from '@/lib/authz';
 import { logActivity } from '@/lib/activity';
+import type { Prisma } from '@/generated/prisma';
+import type { CaseState, UserRole } from '@/generated/prisma';
 
 export default async function CashierCaseDetail(props: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await props.params;
 
+  const include: Prisma.ProcurementCaseInclude = {
+    check: true,
+    checkAdvice: true,
+    dv: true,
+    attachments: true,
+    activityLogs: { orderBy: { createdAt: 'asc' } },
+    // Include related procurement data for context
+    ors: true,
+    award: true,
+    purchaseOrder: true,
+    contract: true,
+    ntp: true,
+    deliveries: true,
+    inspection: true,
+    acceptance: true,
+  };
+
   const c = await prisma.procurementCase.findUnique({
     where: { id },
-    include: {
-      check: true,
-      checkAdvice: true,
-      dv: true,
-      attachments: true,
-      activityLogs: { orderBy: { createdAt: 'asc' } },
-      // Include related procurement data for context
-      ors: true,
-      award: true,
-      purchaseOrder: true,
-      contract: true,
-      ntp: true,
-      deliveries: true,
-      inspection: true,
-      acceptance: true,
-    } as any,
-  }) as any;
+    include,
+  });
 
   if (!c) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
         <div className="text-6xl mb-4">📋</div>
         <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Case Not Found</h2>
-        <p className="text-gray-600 dark:text-gray-400 mb-6">The cashier case you're looking for doesn't exist.</p>
+        <p className="text-gray-600 dark:text-gray-400 mb-6">The cashier case you&apos;re looking for doesn&apos;t exist.</p>
         <Link href="/cashier">
           <Button variant="primary">Back to Cashier</Button>
         </Link>
@@ -51,13 +55,13 @@ export default async function CashierCaseDetail(props: {
   }
 
   const caseData = JSON.parse(JSON.stringify(c));
-  const nextStepMessage = getNextStepMessage(c.currentState as any);
-  const owner = getCurrentOwner(c.currentState as any);
+  const nextStepMessage = getNextStepMessage(c.currentState as LifecycleStageId);
+  const owner = getCurrentOwner(c.currentState as LifecycleStageId);
 
   async function submitCheck(formData: FormData) {
     'use server';
     try {
-      const authz = await ensureRole(['CASHIER_MANAGER', 'ADMIN'] as any);
+      const authz = await ensureRole(['CASHIER_MANAGER', 'ADMIN'] as UserRole[]);
       if (!authz.ok) {
         return { success: false, error: 'Not authorized to submit Check.' };
       }
@@ -85,9 +89,9 @@ export default async function CashierCaseDetail(props: {
           error: 'Case not found',
         };
       }
-      const previousState = existing.currentState as any;
+      const previousState = existing.currentState as CaseState;
 
-      await assertCanTransition(existing as any, 'CHECK' as any);
+      await assertCanTransition(existing, 'CHECK' as CaseState);
 
       await prisma.$transaction(async (tx) => {
         await tx.check.upsert({
@@ -108,7 +112,7 @@ export default async function CashierCaseDetail(props: {
         });
         await tx.procurementCase.update({
           where: { id },
-          data: { currentState: 'CHECK' as any },
+          data: { currentState: 'CHECK' as CaseState },
         });
       });
       try {
@@ -116,7 +120,7 @@ export default async function CashierCaseDetail(props: {
           caseId: id,
           action: 'check_recorded',
           fromState: previousState,
-          toState: 'CHECK' as any,
+          toState: 'CHECK' as CaseState,
           actorId,
           payload: {
             checkNumber: parsed.data.checkNumber ?? null,
@@ -142,7 +146,7 @@ export default async function CashierCaseDetail(props: {
   async function submitCheckAdvice(formData: FormData) {
     'use server';
     try {
-      const authz = await ensureRole(['CASHIER_MANAGER', 'ADMIN'] as any);
+      const authz = await ensureRole(['CASHIER_MANAGER', 'ADMIN'] as UserRole[]);
       if (!authz.ok) {
         return { success: false, error: 'Not authorized to submit Check Advice.' };
       }
@@ -168,9 +172,9 @@ export default async function CashierCaseDetail(props: {
           error: 'Case not found',
         };
       }
-      const previousState = existing.currentState as any;
+      const previousState = existing.currentState as CaseState;
 
-      await assertCanTransition(existing as any, 'CLOSED' as any);
+      await assertCanTransition(existing, 'CLOSED' as CaseState);
 
       await prisma.$transaction(async (tx) => {
         await tx.checkAdvice.upsert({
@@ -187,7 +191,7 @@ export default async function CashierCaseDetail(props: {
         });
         await tx.procurementCase.update({
           where: { id },
-          data: { currentState: 'CLOSED' as any },
+          data: { currentState: 'CLOSED' as CaseState },
         });
       });
       try {
@@ -195,7 +199,7 @@ export default async function CashierCaseDetail(props: {
           caseId: id,
           action: 'check_advice_recorded',
           fromState: previousState,
-          toState: 'CLOSED' as any,
+          toState: 'CLOSED' as CaseState,
           actorId,
           payload: {
             adviceNumber: parsed.data.adviceNumber ?? null,

@@ -12,7 +12,15 @@ export async function logActivity(params: {
 }) {
   const { caseId, action, fromState = null, toState = null, legalBasis = null, payload = null, actorId = null } = params;
   await prisma.activityLog.create({
-    data: { caseId, action, fromState, toState, legalBasis, payload: payload as any, actorId: actorId ?? undefined },
+    data: {
+      caseId,
+      action,
+      fromState,
+      toState,
+      legalBasis,
+      payload: payload as Record<string, unknown> | null,
+      actorId: actorId ?? undefined,
+    },
   });
 }
 

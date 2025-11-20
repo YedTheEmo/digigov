@@ -8,6 +8,7 @@ import { Uploader } from '@/app/(dashboard)/procurement/[id]/Uploader';
 import { getActionMeta } from '@/lib/activityLabels';
 import { getAttachmentDisplayName } from '@/lib/attachments';
 import { ProgressStages } from '@/components/app/ProgressStages';
+import type { ProcurementCase, ActivityLog, Attachment, ORS, Acceptance } from '@/generated/prisma';
 
 type CaseStateVariant = 'completed' | 'cancelled' | 'pending' | 'info' | 'warning';
 
@@ -18,7 +19,14 @@ function getStateVariantLocal(state: string): CaseStateVariant {
   return 'info';
 }
 
-export function BudgetDetailTabs({ caseData, caseId }: { caseData: any; caseId: string }) {
+type BudgetCaseData = ProcurementCase & {
+  ors?: ORS | null;
+  acceptance?: Acceptance | null;
+  attachments?: Attachment[];
+  activityLogs?: ActivityLog[];
+};
+
+export function BudgetDetailTabs({ caseData, caseId }: { caseData: BudgetCaseData; caseId: string }) {
   return (
     <Tabs defaultValue="overview">
       <TabsList>
@@ -106,14 +114,14 @@ export function BudgetDetailTabs({ caseData, caseId }: { caseData: any; caseId: 
           <CardContent>
             {(() => {
               // Filter activity logs to show only budget-related activities
-              const budgetLogs = caseData.activityLogs?.filter((log: any) => {
+              const budgetLogs = caseData.activityLogs?.filter((log: ActivityLog) => {
                 const meta = getActionMeta(log.action);
                 return meta.category === 'budget' || log.action === 'ors_recorded' || log.toState === 'ORS';
               }) || [];
               
               return budgetLogs.length > 0 ? (
                 <div className="space-y-4">
-                  {budgetLogs.map((log: any, index: number) => (
+                  {budgetLogs.map((log: ActivityLog, index: number) => (
                     <div key={log.id} className="flex gap-4">
                       <div className="flex flex-col items-center">
                         <div className="w-3 h-3 rounded-full bg-blue-600 dark:bg-blue-500"></div>
@@ -212,7 +220,7 @@ export function BudgetDetailTabs({ caseData, caseId }: { caseData: any; caseId: 
               
               {caseData.attachments?.length > 0 ? (
                 <div className="space-y-2">
-                  {caseData.attachments.map((attachment: any) => (
+                  {caseData.attachments.map((attachment: Attachment) => (
                     <div
                       key={attachment.id}
                       className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"

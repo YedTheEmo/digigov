@@ -6,9 +6,10 @@ import { useIdempotencyKey } from '../../../../../lib/idempotency';
 import { sendEmail } from '@/lib/notifications/resend';
 import { ensureRole } from '@/lib/authz';
 import { transitionCaseState } from '@/lib/workflows/procurement';
+import type { CaseState, UserRole } from '@/generated/prisma';
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const authz = await ensureRole(['PROCUREMENT_MANAGER', 'ADMIN'] as any);
+  const authz = await ensureRole(['PROCUREMENT_MANAGER', 'ADMIN'] as UserRole[]);
   if (!authz.ok) return NextResponse.json({ error: 'Forbidden' }, { status: authz.status });
 
   const rl = await rateLimit(req, clientIpKey(req, 'contract'));
@@ -44,7 +45,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   });
 
   try {
-    await transitionCaseState(caseId, 'CONTRACT_SIGNED' as any, {
+    await transitionCaseState(caseId, 'CONTRACT_SIGNED' as CaseState, {
       action: 'contract_signed',
       legalBasis: 'RA 9184 IRR Sec. 37 (Contract Signing)',
     });

@@ -18,7 +18,14 @@ const eslintConfig = [
       "out/**",
       "build/**",
       "next-env.d.ts",
+      "src/generated/**",
     ],
+  },
+  {
+    files: ["src/app/api/**/*.ts"],
+    rules: {
+      "react-hooks/rules-of-hooks": "off",
+    },
   },
 ];
 

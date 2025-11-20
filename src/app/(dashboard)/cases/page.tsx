@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
-import { getCurrentOwner, getStateVariant } from '@/lib/casesLifecycle';
+import { getCurrentOwner, getStateVariant, type LifecycleStageId } from '@/lib/casesLifecycle';
 
 export default async function CasesPage({
   searchParams,
@@ -87,7 +87,7 @@ export default async function CasesPage({
           ) : (
             <div className="space-y-2">
               {cases.map((c) => {
-                const owner = getCurrentOwner(c.currentState as any);
+                const owner = getCurrentOwner(c.currentState as LifecycleStageId);
                 return (
                   <Link
                     key={c.id}

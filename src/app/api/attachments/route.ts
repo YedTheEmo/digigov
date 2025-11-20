@@ -6,7 +6,7 @@ import { rateLimit, clientIpKey } from '@/lib/rate-limit';
 import { logActivity } from '@/lib/activity';
 
 export async function POST(req: NextRequest) {
-  const authz = await ensureRole(['ADMIN', 'PROCUREMENT_MANAGER', 'SUPPLY_MANAGER', 'BUDGET_MANAGER', 'ACCOUNTING_MANAGER', 'CASHIER_MANAGER', 'BAC_SECRETARIAT', 'TWG_MEMBER'] as any);
+  const authz = await ensureRole(['ADMIN', 'PROCUREMENT_MANAGER', 'SUPPLY_MANAGER', 'BUDGET_MANAGER', 'ACCOUNTING_MANAGER', 'CASHIER_MANAGER', 'BAC_SECRETARIAT', 'TWG_MEMBER']);
   if (!authz.ok) return NextResponse.json({ error: 'Forbidden' }, { status: authz.status });
   const rl = await rateLimit(req, clientIpKey(req, 'attachments_create'));
   if (!rl.ok) return NextResponse.json({ error: 'Rate limited' }, { status: 429 });

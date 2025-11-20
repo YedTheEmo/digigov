@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
 import { logActivity } from '@/lib/activity';
+import type { ProcurementMethod } from '@/generated/prisma';
 
 async function createCase(formData: FormData) {
   'use server';
@@ -15,7 +16,7 @@ async function createCase(formData: FormData) {
     const title = String(formData.get('title') || 'Untitled');
     const method = String(formData.get('method') || 'SMALL_VALUE_RFQ');
     const created = await prisma.procurementCase.create({
-      data: { title, method: method as any, regime: 'RA9184' },
+      data: { title, method: method as ProcurementMethod, regime: 'RA9184' },
     });
     await logActivity({ caseId: created.id, action: 'create_case', toState: 'DRAFT' });
     revalidatePath('/procurement');
@@ -78,7 +79,7 @@ export default async function ProcurementPage({
   const { search, method, state, sort, filter } = params;
 
   // Build Prisma query with filters
-  const where: any = {};
+  const where: Prisma.ProcurementCaseWhereInput = {};
 
   const filterMode = filter || 'pre-procurement'; // pre-procurement or post-procurement
 
@@ -94,17 +95,17 @@ export default async function ProcurementPage({
   }
 
   if (state && state !== 'ALL') {
-    where.currentState = state;
+    where.currentState = state as CaseState;
   } else if (filterMode === 'pre-procurement') {
     // Cases in Procurement stages (DRAFT through NTP_ISSUED)
-    where.currentState = { in: PRE_PROCUREMENT_STATES as any };
+    where.currentState = { in: PRE_PROCUREMENT_STATES as CaseState[] };
   } else if (filterMode === 'post-procurement') {
     // Cases that have gone through Procurement (DELIVERY and beyond)
-    where.currentState = { in: POST_PROCUREMENT_STATES as any };
+    where.currentState = { in: POST_PROCUREMENT_STATES as CaseState[] };
   }
 
   // Build orderBy
-  let orderBy: any = { createdAt: 'desc' }; // default
+  let orderBy: Prisma.ProcurementCaseOrderByWithRelationInput = { createdAt: 'desc' }; // default
   if (sort === 'oldest') {
     orderBy = { createdAt: 'asc' };
   } else if (sort === 'title-asc') {

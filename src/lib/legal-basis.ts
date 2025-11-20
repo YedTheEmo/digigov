@@ -1,5 +1,3 @@
-import type { ProcurementMethod, Regime } from '@/generated/prisma';
-
 const MAP: Record<string, string> = {
   posting: 'RA 9184 IRR Sec. 21 (Advertising and Posting)',
   pre_bid_conf: 'RA 9184 IRR Sec. 22 (Pre-Bid Conference)',
@@ -17,7 +15,7 @@ const MAP: Record<string, string> = {
   check: 'PFM: Check preparation (Cashier)',
 };
 
-export function getLegalBasis(action: string, _method?: ProcurementMethod | null, _regime?: Regime | null) {
+export function getLegalBasis(action: string) {
   return MAP[action] ?? null;
 }
 
