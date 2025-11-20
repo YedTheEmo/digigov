@@ -1,0 +1,262 @@
+"use client";
+
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Uploader } from '@/app/(dashboard)/procurement/[id]/Uploader';
+import { getActionMeta } from '@/lib/activityLabels';
+import { getAttachmentDisplayName } from '@/lib/attachments';
+import { ProgressStages } from '@/components/app/ProgressStages';
+
+type CaseStateVariant = 'completed' | 'cancelled' | 'pending' | 'info' | 'warning';
+
+function getStateVariantLocal(state: string): CaseStateVariant {
+  if (state === 'CLOSED') return 'completed';
+  if (['DRAFT', 'POSTING'].includes(state)) return 'pending';
+  if (['ORS', 'DV', 'CHECK'].includes(state)) return 'warning';
+  return 'info';
+}
+
+export function AccountingDetailTabs({ caseData, caseId }: { caseData: any; caseId: string }) {
+  return (
+    <Tabs defaultValue="overview">
+      <TabsList>
+        <TabsTrigger value="overview">Overview</TabsTrigger>
+        <TabsTrigger value="timeline">Timeline</TabsTrigger>
+        <TabsTrigger value="dv">DV Details</TabsTrigger>
+        <TabsTrigger value="attachments">Attachments</TabsTrigger>
+      </TabsList>
+
+      {/* Overview Tab */}
+      <TabsContent value="overview">
+        <div className="grid md:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Case Information</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Title</div>
+                <div className="text-base text-gray-900 dark:text-gray-100">{caseData.title}</div>
+              </div>
+              <div>
+                <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Method</div>
+                <Badge variant="info">
+                  {caseData.method === 'SMALL_VALUE_RFQ' ? 'Small Value RFQ' : caseData.method === 'INFRASTRUCTURE' ? 'Infrastructure' : 'Public Bidding'}
+                </Badge>
+              </div>
+              <div>
+                <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Current State</div>
+                <Badge variant={getStateVariantLocal(caseData.currentState)} dot>
+                  {caseData.currentState}
+                </Badge>
+              </div>
+              <div>
+                <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Created</div>
+                <div className="text-base text-gray-900 dark:text-gray-100">
+                  {new Date(caseData.createdAt).toLocaleString()}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <ProgressStages
+            stages={[
+              { label: 'ORS', completed: !!caseData.ors },
+              { label: 'DV', completed: !!caseData.dv },
+            ]}
+          />
+        </div>
+
+        {/* Related ORS Information */}
+        {caseData.ors && (
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle>ORS Information</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <div className="text-sm font-medium text-gray-600 dark:text-gray-400">ORS Number</div>
+                <div className="text-base text-gray-900 dark:text-gray-100">
+                  {caseData.ors.orsNumber || '—'}
+                </div>
+              </div>
+              {caseData.ors.preparedAt && (
+                <div>
+                  <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Prepared At</div>
+                  <div className="text-base text-gray-900 dark:text-gray-100">
+                    {new Date(caseData.ors.preparedAt).toLocaleString()}
+                  </div>
+                </div>
+              )}
+              {caseData.ors.approvedBy && (
+                <div>
+                  <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Approved By</div>
+                  <div className="text-base text-gray-900 dark:text-gray-100">
+                    {caseData.ors.approvedBy}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+      </TabsContent>
+
+      {/* Timeline Tab */}
+      <TabsContent value="timeline">
+        <Card>
+          <CardHeader>
+            <CardTitle>Accounting Activity Timeline</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {(() => {
+              // Filter activity logs to show only accounting-related activities
+              const accountingLogs = caseData.activityLogs?.filter((log: any) => {
+                const meta = getActionMeta(log.action);
+                return meta.category === 'accounting' || log.action === 'dv_recorded' || log.toState === 'DV';
+              }) || [];
+              
+              return accountingLogs.length > 0 ? (
+                <div className="space-y-4">
+                  {accountingLogs.map((log: any, index: number) => (
+                    <div key={log.id} className="flex gap-4">
+                      <div className="flex flex-col items-center">
+                        <div className="w-3 h-3 rounded-full bg-blue-600 dark:bg-blue-500"></div>
+                        {index < accountingLogs.length - 1 && (
+                          <div className="w-0.5 flex-1 bg-gray-200 dark:bg-gray-700 my-1"></div>
+                        )}
+                      </div>
+                      <div className="flex-1 pb-4">
+                        <div className="font-medium text-gray-900 dark:text-gray-100">
+                          {getActionMeta(log.action).label}
+                        </div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                          {new Date(log.createdAt).toLocaleString()}
+                        </div>
+                        {log.toState && (
+                          <Badge variant="info" size="sm" className="mt-2">
+                            → {getActionMeta(log.toState).label}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <EmptyState
+                  icon="📅"
+                  title="No accounting activity yet"
+                  description="Accounting-related activity logs will appear here as actions are taken"
+                />
+              );
+            })()}
+          </CardContent>
+        </Card>
+      </TabsContent>
+
+      {/* DV Details Tab */}
+      <TabsContent value="dv">
+        <Card>
+          <CardHeader>
+            <CardTitle>DV Details</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {caseData.dv ? (
+              <div className="space-y-4">
+                <div>
+                  <div className="text-sm font-medium text-gray-600 dark:text-gray-400">DV Number</div>
+                  <div className="text-base text-gray-900 dark:text-gray-100 font-semibold">
+                    {caseData.dv.dvNumber || '—'}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Prepared At</div>
+                  <div className="text-base text-gray-900 dark:text-gray-100">
+                    {caseData.dv.preparedAt 
+                      ? new Date(caseData.dv.preparedAt).toLocaleString() 
+                      : '—'}
+                  </div>
+                </div>
+                {caseData.dv.approvedAt && (
+                  <div>
+                    <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Approved At</div>
+                    <div className="text-base text-gray-900 dark:text-gray-100">
+                      {new Date(caseData.dv.approvedAt).toLocaleString()}
+                    </div>
+                  </div>
+                )}
+                {caseData.dv.approvedBy && (
+                  <div>
+                    <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Approved By</div>
+                    <div className="text-base text-gray-900 dark:text-gray-100">
+                      {caseData.dv.approvedBy}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <EmptyState
+                icon="📄"
+                title="No DV recorded yet"
+                description="DV will appear here once it has been prepared for this case"
+              />
+            )}
+          </CardContent>
+        </Card>
+      </TabsContent>
+
+      {/* Attachments Tab */}
+      <TabsContent value="attachments">
+        <Card>
+          <CardHeader>
+            <CardTitle>Attachments</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <Uploader caseId={caseId} />
+              
+              {caseData.attachments?.length > 0 ? (
+                <div className="space-y-2">
+                  {caseData.attachments.map((attachment: any) => (
+                    <div
+                      key={attachment.id}
+                      className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="text-2xl">📎</div>
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-gray-100">
+                            {getAttachmentDisplayName(attachment)}
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                            {attachment.createdAt ? new Date(attachment.createdAt).toLocaleDateString() : ''}
+                          </div>
+                        </div>
+                      </div>
+                      <a
+                        href={attachment.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 dark:text-blue-400 hover:underline text-sm font-medium"
+                      >
+                        Open
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <EmptyState
+                  icon="📎"
+                  title="No attachments"
+                  description="Upload documents and files related to this accounting case"
+                />
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </TabsContent>
+    </Tabs>
+  );
+}
+

@@ -1,0 +1,489 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// -----------------------------
+// Enums
+// -----------------------------
+
+enum UserRole {
+  ADMIN
+  PROCUREMENT_MANAGER
+  SUPPLY_MANAGER
+  BUDGET_MANAGER
+  ACCOUNTING_MANAGER
+  CASHIER_MANAGER
+  BAC_SECRETARIAT
+  TWG_MEMBER
+  APPROVER
+}
+
+enum Section {
+  PROCUREMENT
+  SUPPLY
+  BUDGET
+  ACCOUNTING
+  CASHIER
+}
+
+enum Regime {
+  RA12009
+  RA9184
+}
+
+enum ProcurementMethod {
+  SMALL_VALUE_RFQ
+  PUBLIC_BIDDING
+  INFRASTRUCTURE
+}
+
+enum CaseState {
+  DRAFT
+  POSTING
+  RFQ_ISSUED
+  QUOTATION_COLLECTION
+  BID_BULLETIN
+  PRE_BID_CONF
+  BID_SUBMISSION_OPENING
+  TWG_EVALUATION
+  POST_QUALIFICATION
+  ABSTRACT_OF_QUOTATIONS
+  BAC_RESOLUTION
+  AWARDED
+  PO_APPROVED
+  CONTRACT_SIGNED
+  NTP_ISSUED
+  PROGRESS_BILLING
+  PMT_INSPECTION
+  DELIVERY
+  INSPECTION
+  ACCEPTANCE
+  ORS
+  DV
+  CHECK
+  CLOSED
+}
+
+enum InspectionStatus {
+  PASSED
+  FAILED
+}
+
+// -----------------------------
+// Auth (NextAuth compatible)
+// -----------------------------
+
+model User {
+  id             String    @id @default(cuid())
+  name           String?
+  email          String?   @unique
+  emailVerified  DateTime?
+  image          String?
+  hashedPassword String?
+  role           UserRole  @default(PROCUREMENT_MANAGER)
+  section        Section?
+
+  accounts       Account[]
+  sessions       Session[]
+
+  createdCases   ProcurementCase[] @relation("CreatedBy")
+  activityLogs   ActivityLog[]
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  oauth_token_secret String?
+  oauth_token       String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// -----------------------------
+// Core Procurement
+// -----------------------------
+
+model ProcurementCase {
+  id             String             @id @default(cuid())
+  title          String
+  description    String?
+  method         ProcurementMethod
+  regime         Regime             @default(RA9184)
+  abc            Decimal?           @db.Decimal(18, 2)
+  currentState   CaseState          @default(DRAFT)
+  endUserUnit    String?
+
+  postingStartAt DateTime?
+  postingEndAt   DateTime?
+  deliveryDueAt  DateTime?
+
+  createdById    String?
+  createdBy      User?              @relation("CreatedBy", fields: [createdById], references: [id])
+
+  rfq            RFQ?
+  quotations     Quotation[]
+  abstract       AbstractOfQuotations?
+  bacResolution  BACResolution?
+  award          Award?
+  purchaseOrder  PurchaseOrder?
+  contract       Contract?
+  ntp            NoticeToProceed?
+  // Infrastructure branch
+  progressBilling ProgressBilling?
+  pmtInspection  PMTInspectionReport?
+  deliveries     Delivery[]
+  inspection     InspectionReport?
+  acceptance     Acceptance?
+  ors            ORS?
+  dv             DV?
+  check          Check?
+  checkAdvice    CheckAdvice?
+
+  // Public Bidding branch
+  bidBulletins   BidBulletin[]
+  preBid         PreBidConference?
+  bids           Bid[]
+  twgEvaluation  TWGEvaluation?
+  postQualification PostQualification?
+
+  attachments    Attachment[]
+  activityLogs   ActivityLog[]
+  reminders      Reminder[]
+
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+}
+
+model RFQ {
+  id         String           @id @default(cuid())
+  caseId     String           @unique
+  rfqNumber  String?
+  issuedAt   DateTime?
+
+  case       ProcurementCase  @relation(fields: [caseId], references: [id], onDelete: Cascade)
+}
+
+model Quotation {
+  id           String           @id @default(cuid())
+  caseId       String
+  supplierName String
+  amount       Decimal          @db.Decimal(18, 2)
+  isResponsive Boolean          @default(true)
+  submittedAt  DateTime         @default(now())
+
+  case         ProcurementCase  @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId])
+}
+
+model AbstractOfQuotations {
+  id        String           @id @default(cuid())
+  caseId    String           @unique
+  createdAt DateTime         @default(now())
+  notes     String?
+
+  case      ProcurementCase  @relation(fields: [caseId], references: [id], onDelete: Cascade)
+}
+
+model BACResolution {
+  id        String           @id @default(cuid())
+  caseId    String           @unique
+  createdAt DateTime         @default(now())
+  notes     String?
+
+  case      ProcurementCase  @relation(fields: [caseId], references: [id], onDelete: Cascade)
+}
+
+model Award {
+  id          String           @id @default(cuid())
+  caseId      String           @unique
+  noticeDate  DateTime?
+  awardedTo   String?
+
+  case        ProcurementCase  @relation(fields: [caseId], references: [id], onDelete: Cascade)
+}
+
+model PurchaseOrder {
+  id         String           @id @default(cuid())
+  caseId     String           @unique
+  poNo       String?
+  approvedAt DateTime?
+  approvedBy String?
+
+  case       ProcurementCase  @relation(fields: [caseId], references: [id], onDelete: Cascade)
+}
+
+model Contract {
+  id         String           @id @default(cuid())
+  caseId     String           @unique
+  signedAt   DateTime?
+  contractNo String?
+
+  case       ProcurementCase  @relation(fields: [caseId], references: [id], onDelete: Cascade)
+}
+
+model NoticeToProceed {
+  id        String           @id @default(cuid())
+  caseId    String           @unique
+  issuedAt  DateTime?
+  daysToComply Int?
+
+  case      ProcurementCase  @relation(fields: [caseId], references: [id], onDelete: Cascade)
+}
+
+model ProgressBilling {
+  id          String           @id @default(cuid())
+  caseId      String           @unique
+  billingNo   String?
+  amount      Decimal?         @db.Decimal(18, 2)
+  billedAt    DateTime?
+  notes       String?
+
+  case        ProcurementCase  @relation(fields: [caseId], references: [id], onDelete: Cascade)
+}
+
+model PMTInspectionReport {
+  id          String           @id @default(cuid())
+  caseId      String           @unique
+  status      InspectionStatus?
+  inspector   String?
+  inspectedAt DateTime?
+  notes       String?
+
+  case        ProcurementCase  @relation(fields: [caseId], references: [id], onDelete: Cascade)
+}
+
+model Delivery {
+  id          String           @id @default(cuid())
+  caseId      String
+  deliveredAt DateTime?
+  notes       String?
+
+  case        ProcurementCase  @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId])
+}
+
+model InspectionReport {
+  id          String           @id @default(cuid())
+  caseId      String           @unique
+  status      InspectionStatus?
+  inspector   String?
+  inspectedAt DateTime?
+  notes       String?
+
+  // Additional sign-offs
+  coaSignatory      String?
+  coaSignedAt       DateTime?
+  endUserSignatory  String?
+  endUserSignedAt   DateTime?
+
+  case        ProcurementCase  @relation(fields: [caseId], references: [id], onDelete: Cascade)
+}
+
+model Acceptance {
+  id          String           @id @default(cuid())
+  caseId      String           @unique
+  acceptedAt  DateTime?
+  officer     String?
+
+  case        ProcurementCase  @relation(fields: [caseId], references: [id], onDelete: Cascade)
+}
+
+// -----------------------------
+// Public Bidding Models
+// -----------------------------
+
+model BidBulletin {
+  id        String           @id @default(cuid())
+  caseId    String
+  number    Int?
+  publishedAt DateTime?
+  notes     String?
+
+  case      ProcurementCase  @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId])
+}
+
+model PreBidConference {
+  id        String           @id @default(cuid())
+  caseId    String           @unique
+  scheduledAt DateTime?
+  minutesUrl String?
+  notes     String?
+
+  case      ProcurementCase  @relation(fields: [caseId], references: [id], onDelete: Cascade)
+}
+
+model Bid {
+  id           String           @id @default(cuid())
+  caseId       String
+  bidderName   String
+  amount       Decimal          @db.Decimal(18, 2)
+  isResponsive Boolean          @default(true)
+  submittedAt  DateTime         @default(now())
+  openedAt     DateTime?
+
+  case         ProcurementCase  @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId])
+}
+
+model TWGEvaluation {
+  id        String           @id @default(cuid())
+  caseId    String           @unique
+  result    String?
+  notes     String?
+  evaluatedAt DateTime?      @default(now())
+
+  case      ProcurementCase  @relation(fields: [caseId], references: [id], onDelete: Cascade)
+}
+
+model PostQualification {
+  id        String           @id @default(cuid())
+  caseId    String           @unique
+  lowestResponsiveBidder String?
+  passed    Boolean?
+  notes     String?
+  completedAt DateTime?
+
+  case      ProcurementCase  @relation(fields: [caseId], references: [id], onDelete: Cascade)
+}
+
+// -----------------------------
+// Finance
+// -----------------------------
+
+model ORS {
+  id         String           @id @default(cuid())
+  caseId     String           @unique
+  orsNumber  String?
+  preparedAt DateTime?        
+  approvedAt DateTime?
+  approvedBy String?
+
+  case       ProcurementCase  @relation(fields: [caseId], references: [id], onDelete: Cascade)
+}
+
+model DV {
+  id         String           @id @default(cuid())
+  caseId     String           @unique
+  dvNumber   String?
+  preparedAt DateTime?
+  approvedAt DateTime?
+  approvedBy String?
+
+  case       ProcurementCase  @relation(fields: [caseId], references: [id], onDelete: Cascade)
+}
+
+model Check {
+  id         String           @id @default(cuid())
+  caseId     String           @unique
+  checkNumber String?
+  preparedAt DateTime?
+  approvedAt DateTime?
+  approvedBy String?
+
+  case       ProcurementCase  @relation(fields: [caseId], references: [id], onDelete: Cascade)
+}
+
+model CheckAdvice {
+  id          String           @id @default(cuid())
+  caseId      String           @unique
+  adviceNumber String?
+  approvedAt  DateTime?
+
+  case        ProcurementCase  @relation(fields: [caseId], references: [id], onDelete: Cascade)
+}
+
+// -----------------------------
+// Attachments, Logs, Reminders
+// -----------------------------
+
+model Attachment {
+  id         String           @id @default(cuid())
+  caseId     String
+  type       String
+  url        String
+  uploadedBy String?
+  createdAt  DateTime         @default(now())
+
+  case       ProcurementCase  @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId])
+}
+
+model ActivityLog {
+  id          String           @id @default(cuid())
+  caseId      String
+  actorId     String?
+  action      String
+  fromState   CaseState?
+  toState     CaseState?
+  legalBasis  String?
+  payload     Json?
+  createdAt   DateTime         @default(now())
+
+  case        ProcurementCase  @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  actor       User?            @relation(fields: [actorId], references: [id])
+
+  @@index([caseId])
+  @@index([actorId])
+}
+
+model Reminder {
+  id        String           @id @default(cuid())
+  caseId    String
+  type      String
+  dueAt     DateTime
+  sentAt    DateTime?
+
+  case      ProcurementCase  @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId])
+}
