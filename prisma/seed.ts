@@ -28,6 +28,57 @@ async function main() {
   }
 
   console.log('Seeded users with default password: Password123!');
+
+  // Reporting Fixtures
+  const admin = await prisma.user.findUnique({ where: { email: 'admin@local' } });
+  if (admin) {
+    // 1. Completed Case (Closed)
+    const case1 = await prisma.procurementCase.create({
+      data: {
+        title: 'Supply of Office Laptops (Report Test)',
+        method: 'SMALL_VALUE_RFQ',
+        abc: 500000,
+        currentState: 'CLOSED',
+        createdById: admin.id,
+        rfq: {
+          create: { issuedAt: new Date('2025-01-15') }
+        },
+        quotations: {
+          create: [
+            { supplierName: 'Tech Corp', amount: 480000, isResponsive: true },
+            { supplierName: 'Expensive IT', amount: 550000, isResponsive: false }
+          ]
+        },
+        abstract: { create: {} },
+        bacResolution: { create: {} },
+        award: { create: { noticeDate: new Date('2025-02-01'), awardedTo: 'Tech Corp' } },
+        purchaseOrder: { create: { approvedAt: new Date('2025-02-05') } },
+        contract: { create: { signedAt: new Date('2025-02-10') } },
+        ntp: { create: { issuedAt: new Date('2025-02-12') } },
+        deliveries: { create: { deliveredAt: new Date('2025-02-20') } },
+        inspection: { create: { inspectedAt: new Date('2025-02-21'), status: 'PASSED' } },
+        acceptance: { create: { acceptedAt: new Date('2025-02-22') } },
+        ors: { create: { orsNumber: 'ORS-2025-001', preparedAt: new Date('2025-02-25') } },
+        dv: { create: { dvNumber: 'DV-2025-001', preparedAt: new Date('2025-02-28') } },
+        check: { create: { checkNumber: 'CHK-001', approvedAt: new Date('2025-03-05') } }
+      }
+    });
+    console.log('Seeded Completed Case:', case1.title);
+
+    // 2. Pending Payment Case (Overdue DV)
+    const case2 = await prisma.procurementCase.create({
+      data: {
+        title: 'Construction of Walkway (Report Test)',
+        method: 'INFRASTRUCTURE',
+        abc: 1500000,
+        currentState: 'DV',
+        createdById: admin.id,
+        ors: { create: { orsNumber: 'ORS-2025-002', preparedAt: new Date(Date.now() - 1000 * 3600 * 24 * 15) } }, // 15 days ago
+        dv: { create: { dvNumber: 'DV-2025-002', preparedAt: new Date(Date.now() - 1000 * 3600 * 24 * 10) } }, // 10 days ago (Overdue)
+      }
+    });
+    console.log('Seeded Overdue DV Case:', case2.title);
+  }
 }
 
 main().catch((e) => {
@@ -36,5 +87,3 @@ main().catch((e) => {
 }).finally(async () => {
   await prisma.$disconnect();
 });
-
-

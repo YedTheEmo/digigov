@@ -16,17 +16,18 @@ const navItems: NavItem[] = [
   { label: 'Budget', href: '/budget' },
   { label: 'Accounting', href: '/accounting' },
   { label: 'Cashier', href: '/cashier' },
+  { label: 'Reports', href: '/reports' },
   { label: 'Activity Logs', href: '/logs' },
   { label: 'Admin', href: '/admin' },
 ];
 
 const roleNavVisibility: Record<string, string[]> = {
-  PROCUREMENT_MANAGER: ['/cases', '/procurement', '/logs'],
-  BAC_SECRETARIAT: ['/cases', '/procurement', '/logs'],
+  PROCUREMENT_MANAGER: ['/cases', '/procurement', '/reports', '/logs'],
+  BAC_SECRETARIAT: ['/cases', '/procurement', '/reports', '/logs'],
   TWG_MEMBER: ['/cases', '/procurement', '/logs'],
   SUPPLY_MANAGER: ['/cases', '/supply', '/logs'],
-  BUDGET_MANAGER: ['/cases', '/budget', '/logs'],
-  ACCOUNTING_MANAGER: ['/cases', '/accounting', '/logs'],
+  BUDGET_MANAGER: ['/cases', '/budget', '/reports', '/logs'],
+  ACCOUNTING_MANAGER: ['/cases', '/accounting', '/reports', '/logs'],
   CASHIER_MANAGER: ['/cases', '/cashier', '/logs'],
 };
 

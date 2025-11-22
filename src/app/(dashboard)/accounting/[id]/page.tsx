@@ -13,11 +13,14 @@ import { ensureRole } from '@/lib/authz';
 import { logActivity } from '@/lib/activity';
 import type { Prisma } from '@/generated/prisma';
 import type { CaseState, UserRole } from '@/generated/prisma';
+import { auth } from '@/lib/nextauth';
 
 export default async function AccountingCaseDetail(props: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await props.params;
+  const session = await auth();
+  const userRole = session?.user?.role as UserRole | undefined;
 
   const include: Prisma.ProcurementCaseInclude = {
     dv: true,
@@ -32,6 +35,7 @@ export default async function AccountingCaseDetail(props: {
     deliveries: true,
     inspection: true,
     acceptance: true,
+    check: true, // Needed for lock check
   };
 
   const c = await prisma.procurementCase.findUnique({
@@ -92,42 +96,34 @@ export default async function AccountingCaseDetail(props: {
       await assertCanTransition(existing, 'DV' as CaseState);
 
       await prisma.$transaction(async (tx) => {
-        await tx.dV.upsert({
-          where: { caseId: id },
-          update: {
-            dvNumber: parsed.data.dvNumber ?? null,
-            preparedAt: parsed.data.preparedAt ? new Date(parsed.data.preparedAt) : null,
-            approvedAt: parsed.data.approvedAt ? new Date(parsed.data.approvedAt) : null,
-            approvedBy: parsed.data.approvedBy ?? null,
-          },
-          create: {
+        const created = await tx.dV.create({
+           data: {
             caseId: id,
             dvNumber: parsed.data.dvNumber ?? null,
             preparedAt: parsed.data.preparedAt ? new Date(parsed.data.preparedAt) : null,
             approvedAt: parsed.data.approvedAt ? new Date(parsed.data.approvedAt) : null,
             approvedBy: parsed.data.approvedBy ?? null,
-          },
+           }
         });
         await tx.procurementCase.update({
           where: { id },
           data: { currentState: 'DV' as CaseState },
         });
-      });
-      try {
+        
         await logActivity({
           caseId: id,
-          action: 'dv_recorded',
+          action: 'dv',
           fromState: previousState,
           toState: 'DV' as CaseState,
           actorId,
+          changeType: 'CREATE',
+          entity: 'DV',
+          entityId: created.id,
           payload: {
             dvNumber: parsed.data.dvNumber ?? null,
-            approvedBy: parsed.data.approvedBy ?? null,
-          },
+          }
         });
-      } catch (error) {
-        console.error('Failed to log DV activity:', error);
-      }
+      });
 
       revalidatePath(`/(dashboard)/accounting/${id}`);
       return { success: true };
@@ -178,6 +174,7 @@ export default async function AccountingCaseDetail(props: {
           <AccountingQuickActions
             caseData={caseData}
             submitDV={submitDV}
+            userRole={userRole || 'ACCOUNTING_MANAGER'}
           />
 
           {/* Completed steps summary */}
@@ -209,4 +206,3 @@ export default async function AccountingCaseDetail(props: {
     </div>
   );
 }
-

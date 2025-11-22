@@ -13,11 +13,15 @@ import { ensureRole } from '@/lib/authz';
 import { logActivity } from '@/lib/activity';
 import type { Prisma } from '@/generated/prisma';
 import type { CaseState, UserRole } from '@/generated/prisma';
+import { auth } from '@/lib/nextauth';
 
 export default async function BudgetCaseDetail(props: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await props.params;
+
+  const session = await auth();
+  const userRole = session?.user?.role as UserRole | undefined;
 
   const include: Prisma.ProcurementCaseInclude = {
     ors: true,
@@ -31,6 +35,8 @@ export default async function BudgetCaseDetail(props: {
     ntp: true,
     deliveries: true,
     inspection: true,
+    dv: true, // Needed for lock check
+    check: true, // Needed for lock check
   };
 
   const c = await prisma.procurementCase.findUnique({
@@ -91,15 +97,8 @@ export default async function BudgetCaseDetail(props: {
       await assertCanTransition(existing, 'ORS' as CaseState);
 
       await prisma.$transaction(async (tx) => {
-        await tx.oRS.upsert({
-          where: { caseId: id },
-          update: {
-            orsNumber: parsed.data.orsNumber ?? null,
-            preparedAt: parsed.data.preparedAt ? new Date(parsed.data.preparedAt) : null,
-            approvedAt: parsed.data.approvedAt ? new Date(parsed.data.approvedAt) : null,
-            approvedBy: parsed.data.approvedBy ?? null,
-          },
-          create: {
+        const created = await tx.oRS.create({
+          data: {
             caseId: id,
             orsNumber: parsed.data.orsNumber ?? null,
             preparedAt: parsed.data.preparedAt ? new Date(parsed.data.preparedAt) : null,
@@ -111,22 +110,21 @@ export default async function BudgetCaseDetail(props: {
           where: { id },
           data: { currentState: 'ORS' as CaseState },
         });
-      });
-      try {
+        
         await logActivity({
           caseId: id,
-          action: 'ors_recorded',
+          action: 'ors',
           fromState: previousState,
           toState: 'ORS' as CaseState,
           actorId,
+          changeType: 'CREATE',
+          entity: 'ORS',
+          entityId: created.id,
           payload: {
-            orsNumber: parsed.data.orsNumber ?? null,
-            approvedBy: parsed.data.approvedBy ?? null,
-          },
+             orsNumber: parsed.data.orsNumber ?? null,
+          }
         });
-      } catch (error) {
-        console.error('Failed to log ORS activity:', error);
-      }
+      });
 
       revalidatePath(`/(dashboard)/budget/${id}`);
       return { success: true };
@@ -177,6 +175,7 @@ export default async function BudgetCaseDetail(props: {
           <BudgetQuickActions
             caseData={caseData}
             submitORS={submitORS}
+            userRole={userRole || 'PROCUREMENT_MANAGER'} // Fallback if no session, though middleware should catch
           />
 
           {/* Completed steps summary */}
@@ -208,4 +207,3 @@ export default async function BudgetCaseDetail(props: {
     </div>
   );
 }
-

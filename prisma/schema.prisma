@@ -81,6 +81,14 @@ enum InspectionStatus {
   FAILED
 }
 
+enum ChangeType {
+  CREATE
+  UPDATE
+  DELETE
+  RESTORE
+  TRANSITION
+}
+
 // -----------------------------
 // Auth (NextAuth compatible)
 // -----------------------------
@@ -468,6 +476,16 @@ model ActivityLog {
   legalBasis  String?
   payload     Json?
   createdAt   DateTime         @default(now())
+
+  // Enhanced Audit Fields
+  changeType      ChangeType       @default(TRANSITION)
+  entity          String?          // e.g., "RFQ", "ORS"
+  entityId        String?          // ID of the modified entity
+  before          Json?            // Snapshot before change
+  after           Json?            // Snapshot after change
+  reason          String?          // User provided reason
+  performedByRole UserRole?        // Role at time of action
+  isOverride      Boolean          @default(false)
 
   case        ProcurementCase  @relation(fields: [caseId], references: [id], onDelete: Cascade)
   actor       User?            @relation(fields: [actorId], references: [id])
