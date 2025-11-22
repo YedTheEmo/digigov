@@ -13,11 +13,18 @@ import { ensureRole } from '@/lib/authz';
 import { logActivity } from '@/lib/activity';
 import type { Prisma } from '@/generated/prisma';
 import type { CaseState, UserRole } from '@/generated/prisma';
+import { auth } from '@/lib/nextauth';
+import type { Role } from '@/lib/permissions';
 
 export default async function CashierCaseDetail(props: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await props.params;
+
+  const session = await auth();
+  const userEmail = session?.user?.email;
+  const user = userEmail ? await prisma.user.findUnique({ where: { email: userEmail } }) : null;
+  const userRole = (user?.role ?? 'CASHIER_MANAGER') as Role;
 
   const include: Prisma.ProcurementCaseInclude = {
     check: true,
@@ -285,7 +292,7 @@ export default async function CashierCaseDetail(props: {
       </Card>
 
       {/* Tabs Component */}
-      <CashierDetailTabs caseData={caseData} caseId={id} />
+      <CashierDetailTabs caseData={caseData} caseId={id} userRole={userRole} />
     </div>
   );
 }

@@ -9,6 +9,8 @@ import { getActionMeta } from '@/lib/activityLabels';
 import { getAttachmentDisplayName } from '@/lib/attachments';
 import { ProgressStages } from '@/components/app/ProgressStages';
 import type { ProcurementCase, ActivityLog, Attachment, ORS, Acceptance } from '@/generated/prisma';
+import { EditDeleteTab } from './EditDeleteTab';
+import type { Role } from '@/lib/permissions';
 
 type CaseStateVariant = 'completed' | 'cancelled' | 'pending' | 'info' | 'warning';
 
@@ -24,15 +26,16 @@ type BudgetCaseData = ProcurementCase & {
   acceptance?: Acceptance | null;
   attachments?: Attachment[];
   activityLogs?: ActivityLog[];
+  dv?: { id: string } | null;
 };
 
-export function BudgetDetailTabs({ caseData, caseId }: { caseData: BudgetCaseData; caseId: string }) {
+export function BudgetDetailTabs({ caseData, caseId, userRole }: { caseData: BudgetCaseData; caseId: string; userRole: Role }) {
   return (
     <Tabs defaultValue="overview">
       <TabsList>
         <TabsTrigger value="overview">Overview</TabsTrigger>
+        <TabsTrigger value="edit-delete">Edit & Delete</TabsTrigger>
         <TabsTrigger value="timeline">Timeline</TabsTrigger>
-        <TabsTrigger value="ors">ORS Details</TabsTrigger>
         <TabsTrigger value="attachments">Attachments</TabsTrigger>
       </TabsList>
 
@@ -157,55 +160,9 @@ export function BudgetDetailTabs({ caseData, caseId }: { caseData: BudgetCaseDat
         </Card>
       </TabsContent>
 
-      {/* ORS Details Tab */}
-      <TabsContent value="ors">
-        <Card>
-          <CardHeader>
-            <CardTitle>ORS Details</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {caseData.ors ? (
-              <div className="space-y-4">
-                <div>
-                  <div className="text-sm font-medium text-gray-600 dark:text-gray-400">ORS Number</div>
-                  <div className="text-base text-gray-900 dark:text-gray-100 font-semibold">
-                    {caseData.ors.orsNumber || '—'}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Prepared At</div>
-                  <div className="text-base text-gray-900 dark:text-gray-100">
-                    {caseData.ors.preparedAt 
-                      ? new Date(caseData.ors.preparedAt).toLocaleString() 
-                      : '—'}
-                  </div>
-                </div>
-                {caseData.ors.approvedAt && (
-                  <div>
-                    <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Approved At</div>
-                    <div className="text-base text-gray-900 dark:text-gray-100">
-                      {new Date(caseData.ors.approvedAt).toLocaleString()}
-                    </div>
-                  </div>
-                )}
-                {caseData.ors.approvedBy && (
-                  <div>
-                    <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Approved By</div>
-                    <div className="text-base text-gray-900 dark:text-gray-100">
-                      {caseData.ors.approvedBy}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <EmptyState
-                icon="📄"
-                title="No ORS recorded yet"
-                description="ORS will appear here once it has been prepared for this case"
-              />
-            )}
-          </CardContent>
-        </Card>
+      {/* Edit & Delete Tab */}
+      <TabsContent value="edit-delete">
+        <EditDeleteTab caseData={caseData} userRole={userRole} />
       </TabsContent>
 
       {/* Attachments Tab */}

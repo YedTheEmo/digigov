@@ -13,6 +13,7 @@ import { QuickActions } from './QuickActions';
 import { getCurrentOwner, getNextStepMessage, type LifecycleStageId } from '@/lib/casesLifecycle';
 import { CaseHeader } from '@/components/app/CaseHeader';
 import type { Prisma } from '@/generated/prisma';
+import type { Role } from '@/lib/permissions';
 
 async function buildCookieHeader() {
   const store = await cookies();
@@ -781,7 +782,7 @@ export default async function CaseDetail(props: {
       </Card>
 
       {/* Tabs Component - Client Side */}
-      <CaseDetailTabs caseData={caseData} caseId={id} />
+      <CaseDetailTabs caseData={caseData} caseId={id} userRole={role as Role} />
     </div>
   );
 }

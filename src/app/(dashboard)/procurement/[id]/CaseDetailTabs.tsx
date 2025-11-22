@@ -16,6 +16,8 @@ import { getActionMeta } from '@/lib/activityLabels';
 import { getAttachmentDisplayName } from '@/lib/attachments';
 import { ProgressStages } from '@/components/app/ProgressStages';
 import type { ProcurementCase, ActivityLog, Bid, Quotation, Attachment } from '@/generated/prisma';
+import { EditDeleteTab } from './EditDeleteTab';
+import type { Role } from '@/lib/permissions';
 
 type CaseStateVariant = 'completed' | 'cancelled' | 'pending' | 'info' | 'warning';
 
@@ -53,7 +55,7 @@ type CaseDetailData = ProcurementCase & {
   abstract?: { id: string; createdAt?: Date | null } | null;
 };
 
-export function CaseDetailTabs({ caseData, caseId }: { caseData: CaseDetailData; caseId: string }) {
+export function CaseDetailTabs({ caseData, caseId, userRole }: { caseData: CaseDetailData; caseId: string; userRole: Role }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [quoteError, setQuoteError] = useState<string | null>(null);
@@ -114,6 +116,7 @@ export function CaseDetailTabs({ caseData, caseId }: { caseData: CaseDetailData;
     <Tabs defaultValue="overview">
       <TabsList>
         <TabsTrigger value="overview">Overview</TabsTrigger>
+        <TabsTrigger value="edit-delete">Edit & Delete</TabsTrigger>
         <TabsTrigger value="timeline">Timeline</TabsTrigger>
         <TabsTrigger value="quotations">
           {caseData.method === 'PUBLIC_BIDDING' ? 'Bids' : 'Quotations'}
@@ -195,6 +198,11 @@ export function CaseDetailTabs({ caseData, caseId }: { caseData: CaseDetailData;
             }
           />
         </div>
+      </TabsContent>
+
+      {/* Edit & Delete Tab */}
+      <TabsContent value="edit-delete">
+        <EditDeleteTab caseData={caseData} userRole={userRole} />
       </TabsContent>
 
       {/* Timeline Tab */}

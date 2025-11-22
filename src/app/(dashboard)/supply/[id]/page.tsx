@@ -11,6 +11,9 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { getCurrentOwner, type LifecycleStageId } from '@/lib/casesLifecycle';
 import { getActionMeta } from '@/lib/activityLabels';
 import { recordDelivery, submitInspection, submitAcceptance } from '../supplyActions';
+import { auth } from '@/lib/nextauth';
+import type { Role } from '@/lib/permissions';
+import { EditDeleteTab } from './EditDeleteTab';
 
 async function recordDeliveryFormAction(formData: FormData): Promise<void> {
   'use server';
@@ -35,6 +38,11 @@ export default async function SupplyCaseDetail(props: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await props.params;
+
+  const session = await auth();
+  const userEmail = session?.user?.email;
+  const user = userEmail ? await prisma.user.findUnique({ where: { email: userEmail } }) : null;
+  const role = (user?.role ?? 'SUPPLY_MANAGER') as Role;
 
   const c = await prisma.procurementCase.findUnique({
     where: { id },
@@ -252,6 +260,7 @@ export default async function SupplyCaseDetail(props: {
       <Tabs defaultValue="overview">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="edit-delete">Edit & Delete</TabsTrigger>
           <TabsTrigger value="timeline">Timeline</TabsTrigger>
           <TabsTrigger value="attachments">Attachments</TabsTrigger>
         </TabsList>
@@ -298,6 +307,10 @@ export default async function SupplyCaseDetail(props: {
               ]}
             />
           </div>
+        </TabsContent>
+
+        <TabsContent value="edit-delete">
+          <EditDeleteTab caseData={c} userRole={role} />
         </TabsContent>
 
         <TabsContent value="timeline">

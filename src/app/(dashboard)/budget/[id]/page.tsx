@@ -14,6 +14,7 @@ import { logActivity } from '@/lib/activity';
 import type { Prisma } from '@/generated/prisma';
 import type { CaseState, UserRole } from '@/generated/prisma';
 import { auth } from '@/lib/nextauth';
+import type { Role } from '@/lib/permissions';
 
 export default async function BudgetCaseDetail(props: {
   params: Promise<{ id: string }>;
@@ -203,7 +204,7 @@ export default async function BudgetCaseDetail(props: {
       </Card>
 
       {/* Tabs Component */}
-      <BudgetDetailTabs caseData={caseData} caseId={id} />
+      <BudgetDetailTabs caseData={caseData} caseId={id} userRole={(userRole ?? 'BUDGET_MANAGER') as Role} />
     </div>
   );
 }

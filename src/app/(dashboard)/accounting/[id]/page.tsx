@@ -14,6 +14,7 @@ import { logActivity } from '@/lib/activity';
 import type { Prisma } from '@/generated/prisma';
 import type { CaseState, UserRole } from '@/generated/prisma';
 import { auth } from '@/lib/nextauth';
+import type { Role } from '@/lib/permissions';
 
 export default async function AccountingCaseDetail(props: {
   params: Promise<{ id: string }>;
@@ -202,7 +203,7 @@ export default async function AccountingCaseDetail(props: {
       </Card>
 
       {/* Tabs Component */}
-      <AccountingDetailTabs caseData={caseData} caseId={id} />
+      <AccountingDetailTabs caseData={caseData} caseId={id} userRole={(userRole ?? 'ACCOUNTING_MANAGER') as Role} />
     </div>
   );
 }

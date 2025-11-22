@@ -9,6 +9,8 @@ import { getActionMeta } from '@/lib/activityLabels';
 import { getAttachmentDisplayName } from '@/lib/attachments';
 import { ProgressStages } from '@/components/app/ProgressStages';
 import type { ProcurementCase, ActivityLog, Attachment, Check, CheckAdvice, DV } from '@/generated/prisma';
+import { EditDeleteTab } from './EditDeleteTab';
+import type { Role } from '@/lib/permissions';
 
 type CaseStateVariant = 'completed' | 'cancelled' | 'pending' | 'info' | 'warning';
 
@@ -27,14 +29,13 @@ type CashierCaseData = ProcurementCase & {
   activityLogs?: ActivityLog[];
 };
 
-export function CashierDetailTabs({ caseData, caseId }: { caseData: CashierCaseData; caseId: string }) {
+export function CashierDetailTabs({ caseData, caseId, userRole }: { caseData: CashierCaseData; caseId: string; userRole: Role }) {
   return (
     <Tabs defaultValue="overview">
       <TabsList>
         <TabsTrigger value="overview">Overview</TabsTrigger>
+        <TabsTrigger value="edit-delete">Edit & Delete</TabsTrigger>
         <TabsTrigger value="timeline">Timeline</TabsTrigger>
-        <TabsTrigger value="check">Check Details</TabsTrigger>
-        <TabsTrigger value="checkAdvice">Check Advice Details</TabsTrigger>
         <TabsTrigger value="attachments">Attachments</TabsTrigger>
       </TabsList>
 
@@ -171,89 +172,8 @@ export function CashierDetailTabs({ caseData, caseId }: { caseData: CashierCaseD
       </TabsContent>
 
       {/* Check Details Tab */}
-      <TabsContent value="check">
-        <Card>
-          <CardHeader>
-            <CardTitle>Check Details</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {caseData.check ? (
-              <div className="space-y-4">
-                <div>
-                  <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Check Number</div>
-                  <div className="text-base text-gray-900 dark:text-gray-100 font-semibold">
-                    {caseData.check.checkNumber || '—'}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Prepared At</div>
-                  <div className="text-base text-gray-900 dark:text-gray-100">
-                    {caseData.check.preparedAt 
-                      ? new Date(caseData.check.preparedAt).toLocaleString() 
-                      : '—'}
-                  </div>
-                </div>
-                {caseData.check.approvedAt && (
-                  <div>
-                    <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Approved At</div>
-                    <div className="text-base text-gray-900 dark:text-gray-100">
-                      {new Date(caseData.check.approvedAt).toLocaleString()}
-                    </div>
-                  </div>
-                )}
-                {caseData.check.approvedBy && (
-                  <div>
-                    <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Approved By</div>
-                    <div className="text-base text-gray-900 dark:text-gray-100">
-                      {caseData.check.approvedBy}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <EmptyState
-                icon="💳"
-                title="No check recorded yet"
-                description="Check will appear here once it has been prepared for this case"
-              />
-            )}
-          </CardContent>
-        </Card>
-      </TabsContent>
-
-      {/* Check Advice Details Tab */}
-      <TabsContent value="checkAdvice">
-        <Card>
-          <CardHeader>
-            <CardTitle>Check Advice Details</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {caseData.checkAdvice ? (
-              <div className="space-y-4">
-                <div>
-                  <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Check Advice Number</div>
-                  <div className="text-base text-gray-900 dark:text-gray-100 font-semibold">
-                    {caseData.checkAdvice.adviceNumber || '—'}
-                  </div>
-                </div>
-                {caseData.checkAdvice.approvedAt && (
-                  <div>
-                    <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Approved At</div>
-                    <div className="text-base text-gray-900 dark:text-gray-100">
-                      {new Date(caseData.checkAdvice.approvedAt).toLocaleString()}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <EmptyState
-                icon="📋"
-                title="No check advice recorded yet"
-                description="Check advice will appear here once it has been issued for this case"
-              />
-            )}
-          </CardContent>
-        </Card>
+      <TabsContent value="edit-delete">
+        <EditDeleteTab caseData={caseData} userRole={userRole} />
       </TabsContent>
 
       {/* Attachments Tab */}

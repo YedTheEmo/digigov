@@ -9,6 +9,8 @@ import { getActionMeta } from '@/lib/activityLabels';
 import { getAttachmentDisplayName } from '@/lib/attachments';
 import { ProgressStages } from '@/components/app/ProgressStages';
 import type { ProcurementCase, ActivityLog, Attachment, ORS, DV } from '@/generated/prisma';
+import { EditDeleteTab } from './EditDeleteTab';
+import type { Role } from '@/lib/permissions';
 
 type CaseStateVariant = 'completed' | 'cancelled' | 'pending' | 'info' | 'warning';
 
@@ -24,15 +26,16 @@ type AccountingCaseData = ProcurementCase & {
   dv?: DV | null;
   attachments?: Attachment[];
   activityLogs?: ActivityLog[];
+  check?: { id: string } | null;
 };
 
-export function AccountingDetailTabs({ caseData, caseId }: { caseData: AccountingCaseData; caseId: string }) {
+export function AccountingDetailTabs({ caseData, caseId, userRole }: { caseData: AccountingCaseData; caseId: string; userRole: Role }) {
   return (
     <Tabs defaultValue="overview">
       <TabsList>
         <TabsTrigger value="overview">Overview</TabsTrigger>
+        <TabsTrigger value="edit-delete">Edit & Delete</TabsTrigger>
         <TabsTrigger value="timeline">Timeline</TabsTrigger>
-        <TabsTrigger value="dv">DV Details</TabsTrigger>
         <TabsTrigger value="attachments">Attachments</TabsTrigger>
       </TabsList>
 
@@ -164,54 +167,8 @@ export function AccountingDetailTabs({ caseData, caseId }: { caseData: Accountin
       </TabsContent>
 
       {/* DV Details Tab */}
-      <TabsContent value="dv">
-        <Card>
-          <CardHeader>
-            <CardTitle>DV Details</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {caseData.dv ? (
-              <div className="space-y-4">
-                <div>
-                  <div className="text-sm font-medium text-gray-600 dark:text-gray-400">DV Number</div>
-                  <div className="text-base text-gray-900 dark:text-gray-100 font-semibold">
-                    {caseData.dv.dvNumber || '—'}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Prepared At</div>
-                  <div className="text-base text-gray-900 dark:text-gray-100">
-                    {caseData.dv.preparedAt 
-                      ? new Date(caseData.dv.preparedAt).toLocaleString() 
-                      : '—'}
-                  </div>
-                </div>
-                {caseData.dv.approvedAt && (
-                  <div>
-                    <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Approved At</div>
-                    <div className="text-base text-gray-900 dark:text-gray-100">
-                      {new Date(caseData.dv.approvedAt).toLocaleString()}
-                    </div>
-                  </div>
-                )}
-                {caseData.dv.approvedBy && (
-                  <div>
-                    <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Approved By</div>
-                    <div className="text-base text-gray-900 dark:text-gray-100">
-                      {caseData.dv.approvedBy}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <EmptyState
-                icon="📄"
-                title="No DV recorded yet"
-                description="DV will appear here once it has been prepared for this case"
-              />
-            )}
-          </CardContent>
-        </Card>
+      <TabsContent value="edit-delete">
+        <EditDeleteTab caseData={caseData} userRole={userRole} />
       </TabsContent>
 
       {/* Attachments Tab */}

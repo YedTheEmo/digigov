@@ -1,22 +1,22 @@
 "use client";
 
-import { useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 
-import type { ProcurementCase, Quotation, Bid } from '@/generated/prisma';
+import type { ProcurementCase, Quotation, Bid, RFQ, Award, BACResolution } from '@/generated/prisma';
 
 type QuickActionsProps = {
   caseData: ProcurementCase & {
     quotations?: Quotation[];
     bids?: Bid[];
-    rfq?: { id: string } | null;
+    rfq?: RFQ | null;
     abstract?: { id: string } | null;
-    bacResolution?: { id: string } | null;
-    award?: { id: string } | null;
+    bacResolution?: BACResolution | null;
+    award?: Award | null;
     purchaseOrder?: { id: string } | null;
     contract?: { id: string } | null;
     ntp?: { id: string } | null;
@@ -233,8 +233,8 @@ export function QuickActions({
 
         {c.bacResolution && !c.award && can(role, ['APPROVER', 'BAC_SECRETARIAT', 'ADMIN']) && (
           <form action={handleSubmitAward} className="flex items-center gap-2">
-            <Select name="awardedTo" className="w-[250px]">
-              <option value="" disabled selected>Select Supplier</option>
+            <Select name="awardedTo" className="w-[250px]" defaultValue="">
+              <option value="" disabled>Select Supplier</option>
               {c.quotations?.map((q: Quotation) => (
                 <option key={q.id} value={q.supplierName}>
                   {q.supplierName} - {q.amount ? String(q.amount) : 'N/A'}
@@ -327,5 +327,3 @@ export function QuickActions({
     </div>
   );
 }
-
-
