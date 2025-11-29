@@ -98,8 +98,8 @@ export default async function SupplyCaseDetail(props: {
         </CardHeader>
         <CardContent className="space-y-8">
           {/* Record Delivery */}
-          <div className="p-6 rounded-lg bg-gray-50 dark:bg-[#1a1d23] border border-gray-100 dark:border-[#2d3139]">
-            <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-2">
+          <div className="p-6 rounded-lg bg-[var(--color-bg-tertiary)] border border-[var(--color-border-primary)]">
+            <h3 className="text-base font-semibold text-[var(--color-text-primary)] mb-2">
               Record Delivery
             </h3>
             {latestDelivery ? (
@@ -125,14 +125,16 @@ export default async function SupplyCaseDetail(props: {
                 type="datetime-local"
                 label="Delivered At"
                 helperText="Date and time the items were received."
+                disabled={!!c.acceptance}
               />
               <Input
                 name="notes"
                 label="Delivery Notes"
                 placeholder="e.g. Partial delivery, damaged boxes, etc."
+                disabled={!!c.acceptance}
               />
               <div className="flex items-end">
-                <Button type="submit" variant="primary" className="w-full">
+                <Button type="submit" variant="primary" className="w-full" disabled={!!c.acceptance}>
                   Record Delivery
                 </Button>
               </div>
@@ -140,8 +142,8 @@ export default async function SupplyCaseDetail(props: {
           </div>
 
           {/* Inspection */}
-          <div className="p-6 rounded-lg bg-gray-50 dark:bg-[#1a1d23] border border-gray-100 dark:border-[#2d3139]">
-            <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-2">
+          <div className="p-6 rounded-lg bg-[var(--color-bg-tertiary)] border border-[var(--color-border-primary)]">
+            <h3 className="text-base font-semibold text-[var(--color-text-primary)] mb-2">
               Inspection
             </h3>
             {c.inspection ? (
@@ -166,7 +168,7 @@ export default async function SupplyCaseDetail(props: {
               className="grid grid-cols-1 md:grid-cols-3 gap-4"
             >
               <input type="hidden" name="id" value={c.id} />
-              <Select name="status" label="Inspection Status">
+              <Select name="status" label="Inspection Status" disabled={!!c.acceptance}>
                 <option value="PASSED">Passed</option>
                 <option value="FAILED">Failed</option>
               </Select>
@@ -174,9 +176,10 @@ export default async function SupplyCaseDetail(props: {
                 name="inspector"
                 label="Inspector"
                 placeholder="Name of inspection officer"
+                disabled={!!c.acceptance}
               />
               <div className="flex items-end">
-                <Button type="submit" variant="primary" className="w-full">
+                <Button type="submit" variant="primary" className="w-full" disabled={!!c.acceptance}>
                   Submit Inspection
                 </Button>
               </div>
@@ -184,8 +187,8 @@ export default async function SupplyCaseDetail(props: {
           </div>
 
           {/* Acceptance */}
-          <div className="p-6 rounded-lg bg-gray-50 dark:bg-[#1a1d23] border border-gray-100 dark:border-[#2d3139]">
-            <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-2">
+          <div className="p-6 rounded-lg bg-[var(--color-bg-tertiary)] border border-[var(--color-border-primary)]">
+            <h3 className="text-base font-semibold text-[var(--color-text-primary)] mb-2">
               Acceptance
             </h3>
             {c.acceptance ? (

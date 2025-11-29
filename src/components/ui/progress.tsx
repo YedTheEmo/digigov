@@ -16,10 +16,10 @@ const sizeClasses = {
 };
 
 const variantClasses = {
-  default: 'bg-blue-600 dark:bg-blue-500',
-  success: 'bg-green-600 dark:bg-green-500',
-  warning: 'bg-yellow-600 dark:bg-yellow-500',
-  error: 'bg-red-600 dark:bg-red-500',
+  default: 'bg-[var(--color-primary)]',
+  success: 'bg-[var(--color-success)]',
+  warning: 'bg-[var(--color-warning)]',
+  error: 'bg-[var(--color-error)]',
 };
 
 export function Progress({
@@ -35,12 +35,12 @@ export function Progress({
   return (
     <div className={className}>
       {showLabel && (
-        <div className="flex items-center justify-between mb-1 text-sm text-gray-600 dark:text-gray-400">
+        <div className="flex items-center justify-between mb-1 text-sm text-[var(--color-text-secondary)]">
           <span>Progress</span>
           <span>{Math.round(percentage)}%</span>
         </div>
       )}
-      <div className={`w-full bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden ${sizeClasses[size]}`}>
+      <div className={`w-full bg-[var(--color-bg-tertiary)] rounded-full overflow-hidden ${sizeClasses[size]}`}>
         <div
           className={`h-full transition-all duration-300 ease-out ${variantClasses[variant]}`}
           style={{ width: `${percentage}%` }}

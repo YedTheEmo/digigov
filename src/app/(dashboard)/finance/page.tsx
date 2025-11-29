@@ -5,7 +5,7 @@ import type { Metadata } from 'next';
 
 const financeModules = [
   {
-    title: 'Budget Management',
+    title: 'Budget',
     description: 'Track appropriations, SARO releases, obligations, and disbursement limits.',
     href: '/budget',
     detail: 'Monitor fund availability, earmarks, and aligned procurement packages.',

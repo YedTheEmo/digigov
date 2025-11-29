@@ -34,22 +34,22 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4 sm:px-6">
+    <div className="min-h-screen w-full bg-[var(--color-bg-secondary)] flex items-center justify-center px-4 sm:px-6">
       <div className="w-full max-w-md mx-auto">
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-md shadow-md">
-          <div className="px-8 pt-8 pb-6 border-b border-gray-200 dark:border-gray-800">
-            <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+        <div className="bg-[var(--color-bg-primary)] border border-[var(--color-border-primary)] rounded-md shadow-md">
+          <div className="px-8 pt-8 pb-6 border-b border-[var(--color-border-primary)]">
+            <h1 className="text-2xl font-semibold text-[var(--color-text-primary)]">
               DigiGov
             </h1>
-            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
               Sign in with your official account.
             </p>
           </div>
 
           {error && (
             <div className="px-8 pt-4">
-              <div className="rounded-md border border-red-300 bg-red-50 dark:bg-red-900/10 dark:border-red-700 px-3 py-2.5 text-sm text-red-800 dark:text-red-300 flex items-start gap-2">
-                <span className="mt-0.5 h-1.5 w-1.5 rounded-full bg-red-500" />
+              <div className="rounded-md border border-[var(--color-error)] bg-[var(--color-error-light)] px-3 py-2.5 text-sm text-[var(--color-error)] flex items-start gap-2">
+                <span className="mt-0.5 h-1.5 w-1.5 rounded-full bg-[var(--color-error)]" />
                 <span className="flex-1">{error}</span>
               </div>
             </div>
@@ -76,16 +76,16 @@ function LoginForm() {
             />
 
             <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer select-none">
+              <label className="flex items-center gap-2 text-sm text-[var(--color-text-secondary)] cursor-pointer select-none">
                 <input
                   type="checkbox"
-                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="h-4 w-4 rounded border-[var(--color-border-primary)] text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
                 />
                 <span>Remember me</span>
               </label>
               <a
                 href="#"
-                className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
+                className="text-sm font-medium text-[var(--color-primary)] hover:underline"
               >
                 Forgot password?
               </a>
@@ -102,14 +102,14 @@ function LoginForm() {
             </Button>
 
             {process.env.NEXT_PUBLIC_DEMO === '1' && (
-              <div className="mt-4 rounded-md border border-blue-100 dark:border-blue-900/40 bg-blue-50 dark:bg-blue-900/10 px-3 py-2 text-xs text-blue-900 dark:text-blue-100">
+              <div className="mt-4 rounded-md border border-[var(--color-info)] bg-[var(--color-info-light)] px-3 py-2 text-xs text-[var(--color-info)]">
                 <span className="font-semibold">Demo mode:</span> Use any provisioned test account
                 (password provided separately).
               </div>
             )}
           </form>
         </div>
-        <p className="mt-6 text-center text-xs text-gray-500 dark:text-gray-500">
+        <p className="mt-6 text-center text-xs text-[var(--color-text-tertiary)]">
           © {new Date().getFullYear()} DigiGov. All rights reserved.
         </p>
       </div>
@@ -120,8 +120,8 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen w-full bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-gray-600 dark:text-gray-400">Loading...</div>
+      <div className="min-h-screen w-full bg-[var(--color-bg-secondary)] flex items-center justify-center">
+        <div className="text-[var(--color-text-secondary)]">Loading...</div>
       </div>
     }>
       <LoginForm />

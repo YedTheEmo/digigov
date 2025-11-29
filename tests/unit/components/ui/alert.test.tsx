@@ -16,16 +16,16 @@ describe('Alert', () => {
 
   it('renders different variants', () => {
     const { rerender } = render(<Alert variant="info">Info</Alert>);
-    expect(screen.getByRole('alert')).toHaveClass('bg-blue-50');
+    expect(screen.getByRole('alert')).toHaveClass('bg-[var(--color-info-light)]');
     
     rerender(<Alert variant="success">Success</Alert>);
-    expect(screen.getByRole('alert')).toHaveClass('bg-green-50');
+    expect(screen.getByRole('alert')).toHaveClass('bg-[var(--color-success-light)]');
     
     rerender(<Alert variant="warning">Warning</Alert>);
-    expect(screen.getByRole('alert')).toHaveClass('bg-yellow-50');
+    expect(screen.getByRole('alert')).toHaveClass('bg-[var(--color-warning-light)]');
     
     rerender(<Alert variant="error">Error</Alert>);
-    expect(screen.getByRole('alert')).toHaveClass('bg-red-50');
+    expect(screen.getByRole('alert')).toHaveClass('bg-[var(--color-error-light)]');
   });
 
   it('can be dismissed when dismissible', async () => {

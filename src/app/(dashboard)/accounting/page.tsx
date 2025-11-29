@@ -175,7 +175,7 @@ export default async function AccountingPage({
                 <Link
                   key={c.id}
                   href={`/accounting/${c.id}`}
-                  className="flex flex-col md:flex-row md:items-center md:justify-between px-10 py-7 hover:bg-gray-50 dark:hover:bg-[#242830] transition-all duration-250 group gap-5"
+                  className="flex flex-col md:flex-row md:items-center md:justify-between px-10 py-7 hover:bg-[var(--color-bg-hover)] transition-all duration-250 group gap-5"
                   style={{ 
                     animation: `slideInUp 350ms cubic-bezier(0.34, 1.56, 0.64, 1)`,
                     animationDelay: `${index * 50}ms`,

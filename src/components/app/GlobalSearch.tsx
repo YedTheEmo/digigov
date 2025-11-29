@@ -164,11 +164,11 @@ export function GlobalSearch({ open, onClose }: GlobalSearchProps) {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-xl rounded-2xl bg-[#111318] border border-[#2d3139] shadow-2xl mx-4 animate-slide-down"
+        className="w-full max-w-xl rounded-2xl bg-[var(--color-bg-primary)] border border-[var(--color-border-primary)] shadow-2xl mx-4 animate-slide-down"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-[#2d3139]">
-          <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-[var(--color-border-primary)]">
+          <svg className="w-5 h-5 text-[var(--color-text-tertiary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -181,16 +181,16 @@ export function GlobalSearch({ open, onClose }: GlobalSearchProps) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="flex-1 bg-transparent text-sm text-gray-100 placeholder:text-gray-500 outline-none border-none"
+            className="flex-1 bg-transparent text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-tertiary)] outline-none border-none"
             placeholder="Search DigiGov workspaces, reports, and actions…"
           />
-          <span className="hidden md:inline-flex items-center gap-1 rounded-md border border-[#2d3139] px-2 py-0.5 text-[11px] text-gray-500">
+          <span className="hidden md:inline-flex items-center gap-1 rounded-md border border-[var(--color-border-secondary)] px-2 py-0.5 text-[11px] text-[var(--color-text-tertiary)]">
             <span className="font-mono text-[10px]">Ctrl</span>+<span className="font-mono text-[10px]">K</span>
           </span>
         </div>
         <div className="max-h-80 overflow-y-auto py-1">
           {filtered.length === 0 ? (
-            <div className="px-4 py-4 text-sm text-gray-500">No matches. Try a different term.</div>
+            <div className="px-4 py-4 text-sm text-[var(--color-text-tertiary)]">No matches. Try a different term.</div>
           ) : (
             filtered.map((item, index) => (
               <button
@@ -198,18 +198,18 @@ export function GlobalSearch({ open, onClose }: GlobalSearchProps) {
                 type="button"
                 onClick={() => handleNavigate(item)}
                 className={`w-full px-4 py-2.5 text-left text-sm flex flex-col gap-0.5 transition-colors ${
-                  index === activeIndex ? 'bg-[#181b22] text-gray-100' : 'text-gray-300 hover:bg-[#181b22]'
+                  index === activeIndex ? 'bg-[var(--color-bg-hover)] text-[var(--color-text-primary)]' : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)]'
                 }`}
               >
                 <span className="font-medium">{item.label}</span>
                 {item.description && (
-                  <span className="text-xs text-gray-500">{item.description}</span>
+                  <span className="text-xs text-[var(--color-text-tertiary)]">{item.description}</span>
                 )}
               </button>
             ))
           )}
         </div>
-        <div className="flex items-center justify-between px-4 py-2 border-t border-[#2d3139] text-[11px] text-gray-500">
+        <div className="flex items-center justify-between px-4 py-2 border-t border-[var(--color-border-primary)] text-[11px] text-[var(--color-text-tertiary)]">
           <span>Program-wide search across DigiGov workspaces and utilities.</span>
           <span>Use case search in the Cases workspace for record-level results.</span>
         </div>

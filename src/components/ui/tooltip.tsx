@@ -45,7 +45,7 @@ export function Tooltip({ content, children, position = 'top', disabled = false,
       </div>
       {visible && (
         <div
-          className={`absolute z-50 px-2 py-1 text-xs text-white bg-gray-900 dark:bg-gray-700 rounded whitespace-nowrap pointer-events-none animate-fade-in ${positionClasses[position]} ${className}`}
+          className={`absolute z-50 px-2 py-1 text-xs text-white bg-[var(--color-text-primary)] rounded whitespace-nowrap pointer-events-none animate-fade-in ${positionClasses[position]} ${className}`}
           role="tooltip"
         >
           {content}

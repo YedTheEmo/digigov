@@ -43,7 +43,7 @@ export function Dropdown({ trigger, children, align = 'end', className = '' }: D
         <div
           className={`absolute ${
             align === 'end' ? 'right-0' : 'left-0'
-          } mt-2 min-w-[12rem] rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg z-50 animate-slide-down`}
+          } mt-2 min-w-[12rem] rounded-md border border-[var(--color-border-primary)] bg-[var(--color-bg-primary)] shadow-lg z-50 animate-slide-down`}
           role="menu"
         >
           {children}
@@ -55,15 +55,15 @@ export function Dropdown({ trigger, children, align = 'end', className = '' }: D
 
 export function DropdownLabel({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
-    <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-700">
-      <div className="font-medium text-gray-900 dark:text-gray-100 truncate">{title}</div>
-      {subtitle && <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{subtitle}</div>}
+    <div className="px-3 py-2 border-b border-[var(--color-border-primary)]">
+      <div className="font-medium text-[var(--color-text-primary)] truncate">{title}</div>
+      {subtitle && <div className="text-xs text-[var(--color-text-tertiary)] truncate">{subtitle}</div>}
     </div>
   );
 }
 
 export function DropdownDivider() {
-  return <div className="my-1 border-t border-gray-200 dark:border-gray-700" />;
+  return <div className="my-1 border-t border-[var(--color-border-primary)]" />;
 }
 
 export interface DropdownItemProps {
@@ -79,8 +79,8 @@ export function DropdownItem({ onClick, children, icon, destructive = false, dis
     <button
       className={`w-full flex items-center gap-2 px-3 py-2 text-sm text-left transition-colors ${
         destructive
-          ? 'text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20'
-          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+          ? 'text-[var(--color-error)] hover:bg-[var(--color-error-light)]'
+          : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-hover)]'
       } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
       onClick={onClick}
       role="menuitem"

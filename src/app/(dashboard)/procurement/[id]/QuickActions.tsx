@@ -233,7 +233,13 @@ export function QuickActions({
 
         {c.bacResolution && !c.award && can(role, ['APPROVER', 'BAC_SECRETARIAT', 'ADMIN']) && (
           <form action={handleSubmitAward} className="flex items-center gap-2">
-            <Select name="awardedTo" className="w-[250px]" defaultValue="">
+            <Input
+              name="noticeDate"
+              type="datetime-local"
+              label="Notice of Award Date"
+              className="w-auto"
+            />
+            <Select name="awardedTo" label="Supplier" className="w-[250px]" defaultValue="">
               <option value="" disabled>Select Supplier</option>
               {c.quotations?.map((q: Quotation) => (
                 <option key={q.id} value={q.supplierName}>
@@ -246,12 +252,6 @@ export function QuickActions({
                 </option>
               ))}
             </Select>
-            <Input
-              name="noticeDate"
-              type="datetime-local"
-              label="Notice of Award Date"
-              className="w-auto"
-            />
             <Button type="submit" variant="primary" size="sm" disabled={isPending} data-testid="btn-award">
               Award
             </Button>

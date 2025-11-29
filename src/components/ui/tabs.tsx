@@ -35,7 +35,7 @@ export function Tabs({ defaultValue, children, className = '', onChange }: TabsP
 export function TabsList({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
     <div
-      className={`inline-flex items-center gap-1 p-1 bg-gray-100 dark:bg-gray-800 rounded-lg ${className}`}
+      className={`inline-flex items-center gap-1 p-1 bg-[var(--color-bg-tertiary)] rounded-lg ${className}`}
       role="tablist"
     >
       {children}
@@ -65,8 +65,8 @@ export function TabsTrigger({ value, children, disabled = false, className = '' 
       onClick={() => setActiveTab(value)}
       className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
         isActive
-          ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm'
-          : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
+          ? 'bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] shadow-sm'
+          : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
       } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${className}`}
     >
       {children}

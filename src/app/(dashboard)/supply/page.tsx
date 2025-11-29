@@ -110,14 +110,14 @@ export default async function SupplyPage({
                     name="search"
                     defaultValue={search}
                     placeholder="Search cases..."
-                    className="w-full border border-gray-300 dark:border-[#3a3f4a] rounded-lg pl-10 pr-3 py-2 text-sm bg-white dark:bg-[#242830] text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-600/20 focus:border-green-600 hover:border-gray-400 dark:hover:border-gray-500"
+                    className="w-full border border-[var(--color-border-primary)] rounded-lg pl-10 pr-3 py-2 text-sm bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] placeholder-[var(--color-text-tertiary)] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] hover:border-[var(--color-border-secondary)]"
                   />
                 </div>
                 
                 <select
                   name="state"
                   defaultValue={state || 'ALL'}
-                  className="border border-gray-300 dark:border-[#3a3f4a] rounded-lg px-3 py-2 text-sm bg-white dark:bg-[#242830] text-gray-900 dark:text-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-600/20 focus:border-green-600 hover:border-gray-400 dark:hover:border-gray-500"
+                  className="border border-[var(--color-border-primary)] rounded-lg px-3 py-2 text-sm bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] hover:border-[var(--color-border-secondary)]"
                 >
                   <option value="ALL">All States</option>
                   <option value="NTP_ISSUED">NTP Issued</option>
@@ -129,7 +129,7 @@ export default async function SupplyPage({
                 <select
                   name="sort"
                   defaultValue={sort || 'newest'}
-                  className="border border-gray-300 dark:border-[#3a3f4a] rounded-lg px-3 py-2 text-sm bg-white dark:bg-[#242830] text-gray-900 dark:text-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-600/20 focus:border-green-600 hover:border-gray-400 dark:hover:border-gray-500"
+                  className="border border-[var(--color-border-primary)] rounded-lg px-3 py-2 text-sm bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] hover:border-[var(--color-border-secondary)]"
                 >
                   <option value="newest">Newest First</option>
                   <option value="oldest">Oldest First</option>
@@ -140,7 +140,7 @@ export default async function SupplyPage({
                 <select
                   name="filter"
                   defaultValue={filterMode}
-                  className="border border-gray-300 dark:border-[#3a3f4a] rounded-lg px-3 py-2 text-sm bg-white dark:bg-[#242830] text-gray-900 dark:text-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-600/20 focus:border-green-600 hover:border-gray-400 dark:hover:border-gray-500"
+                  className="border border-[var(--color-border-primary)] rounded-lg px-3 py-2 text-sm bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] hover:border-[var(--color-border-secondary)]"
                 >
                   <option value="pre-supply">In Progress</option>
                   <option value="post-supply">Past Supply</option>
@@ -189,7 +189,7 @@ export default async function SupplyPage({
                 <Link
                   key={c.id}
                   href={`/supply/${c.id}`}
-                  className="flex flex-col md:flex-row md:items-center md:justify-between px-10 py-7 hover:bg-gray-50 dark:hover:bg-[#242830] transition-all duration-250 group gap-5"
+                  className="flex flex-col md:flex-row md:items-center md:justify-between px-10 py-7 hover:bg-[var(--color-bg-hover)] transition-all duration-250 group gap-5"
                   style={{ 
                     animation: `slideInUp 350ms cubic-bezier(0.34, 1.56, 0.64, 1)`,
                     animationDelay: `${index * 50}ms`,

@@ -21,7 +21,7 @@ export function Skeleton({ className = '', variant = 'rectangular', width, heigh
 
   return (
     <div
-      className={`animate-pulse bg-gray-200 dark:bg-gray-700 ${variantClass} ${className}`}
+      className={`animate-pulse bg-[var(--color-bg-tertiary)] ${variantClass} ${className}`}
       style={style}
       aria-hidden="true"
     />

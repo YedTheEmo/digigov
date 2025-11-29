@@ -153,14 +153,14 @@ export default function ReportsPage() {
               {budgetData?.payables && budgetData.payables.length > 0 ? (
                 <div className="space-y-2">
                   {budgetData.payables.map((p) => (
-                    <div key={p.caseId} className="flex items-center justify-between p-2 border rounded hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <div key={p.caseId} className="flex items-center justify-between p-2 border rounded hover:bg-[var(--color-bg-hover)]">
                       <div>
                         <div className="font-medium">{p.title}</div>
-                        <div className="text-xs text-gray-500">DV: {p.dvNumber} • Amount: ₱{p.amount.toLocaleString()}</div>
+                        <div className="text-xs text-[var(--color-text-tertiary)]">DV: {p.dvNumber} • Amount: ₱{p.amount.toLocaleString()}</div>
                       </div>
                       <div className="flex items-center gap-2">
                          <span className={`px-2 py-1 text-xs rounded-full ${
-                           p.ageDays > 7 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                           p.ageDays > 7 ? 'bg-[var(--color-error-light)] text-[var(--color-error)]' : 'bg-[var(--color-success-light)] text-[var(--color-success)]'
                          }`}>
                            {p.ageDays} days old
                          </span>
@@ -169,7 +169,7 @@ export default function ReportsPage() {
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-gray-500">No pending payables.</p>
+                <p className="text-sm text-[var(--color-text-tertiary)]">No pending payables.</p>
               )}
             </CardContent>
           </Card>
@@ -212,13 +212,13 @@ export default function ReportsPage() {
                        <span className="font-medium">{s.avg.toFixed(1)} days</span>
                      </div>
                      {/* Simple Bar Chart */}
-                     <div className="h-2 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                     <div className="h-2 w-full bg-[var(--color-bg-tertiary)] rounded-full overflow-hidden">
                        <div 
-                         className={`h-full rounded-full ${s.avg > 7 ? 'bg-red-500' : 'bg-blue-500'}`} 
+                         className={`h-full rounded-full ${s.avg > 7 ? 'bg-[var(--color-error)]' : 'bg-[var(--color-info)]'}`} 
                          style={{ width: `${Math.min((s.avg / 30) * 100, 100)}%` }}
                        />
                      </div>
-                     <div className="flex justify-between text-xs text-gray-400">
+                     <div className="flex justify-between text-xs text-[var(--color-text-tertiary)]">
                        <span>Min: {s.min.toFixed(1)}</span>
                        <span>Max: {s.max.toFixed(1)}</span>
                      </div>
