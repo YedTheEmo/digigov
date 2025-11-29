@@ -10,7 +10,7 @@ export interface CardProps {
 export function Card({ className = '', children, hover = false, onClick }: CardProps) {
   return (
     <div
-      className={`bg-white dark:bg-[#242830] border border-gray-200 dark:border-[#2d3139] rounded-lg shadow-sm transition-all duration-200 ${
+      className={`bg-[var(--color-bg-primary)] border border-[var(--color-border-primary)] rounded-[var(--radius-lg)] shadow-sm transition-all duration-200 ${
         hover ? 'hover:shadow-md' : ''
       } ${onClick ? 'cursor-pointer' : ''} ${className}`}
       onClick={onClick}
@@ -21,15 +21,15 @@ export function Card({ className = '', children, hover = false, onClick }: CardP
 }
 
 export function CardHeader({ className = '', children }: { className?: string; children: React.ReactNode }) {
-  return <div className={`px-8 py-7 border-b border-gray-100 dark:border-[#2d3139] ${className}`}>{children}</div>;
+  return <div className={`px-8 py-7 border-b border-[var(--color-border-primary)] ${className}`}>{children}</div>;
 }
 
 export function CardTitle({ className = '', children }: { className?: string; children: React.ReactNode }) {
-  return <h3 className={`text-xl font-semibold text-gray-900 dark:text-gray-100 leading-7 ${className}`}>{children}</h3>;
+  return <h3 className={`text-xl font-semibold text-[var(--color-text-primary)] leading-7 ${className}`}>{children}</h3>;
 }
 
 export function CardDescription({ className = '', children }: { className?: string; children: React.ReactNode }) {
-  return <p className={`text-base text-gray-600 dark:text-gray-400 mt-2 leading-relaxed ${className}`}>{children}</p>;
+  return <p className={`text-base text-[var(--color-text-secondary)] mt-2 leading-relaxed ${className}`}>{children}</p>;
 }
 
 export function CardContent({ className = '', children }: { className?: string; children: React.ReactNode }) {
@@ -37,5 +37,5 @@ export function CardContent({ className = '', children }: { className?: string; 
 }
 
 export function CardFooter({ className = '', children }: { className?: string; children: React.ReactNode }) {
-  return <div className={`px-8 py-7 border-t border-gray-200 dark:border-gray-700 ${className}`}>{children}</div>;
+  return <div className={`px-8 py-7 border-t border-[var(--color-border-primary)] ${className}`}>{children}</div>;
 }

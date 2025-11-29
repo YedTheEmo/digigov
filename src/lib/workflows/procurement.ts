@@ -50,7 +50,7 @@ function transitionsForMethod(method: ProcurementMethod) {
       CONTRACT_SIGNED: ['NTP_ISSUED'],
       NTP_ISSUED: ['PROGRESS_BILLING'],
       PROGRESS_BILLING: ['PMT_INSPECTION'],
-      PMT_INSPECTION: ['ACCEPTANCE'],
+      PMT_INSPECTION: ['PROGRESS_BILLING', 'ACCEPTANCE'],
       ACCEPTANCE: ['ORS'],
       ORS: ['DV'],
       DV: ['CHECK'],
@@ -130,6 +130,10 @@ export async function assertCanTransition(case_: ProcurementCase, nextState: Cas
       const pq = await prisma.postQualification.findUnique({ where: { caseId } });
       if (!pq?.passed) throw new Error('Passed Post-Qualification required before BAC Resolution/Award');
     }
+    if (nextState === 'AWARDED') {
+      const bac = await prisma.bACResolution.findUnique({ where: { caseId } });
+      if (!bac) throw new Error('BAC Resolution required before Award');
+    }
   } else if (method === 'INFRASTRUCTURE') {
     // Check bid existence only when moving TO evaluation, not when entering bid submission
     // BID_SUBMISSION_OPENING is when bids are BEING created, so we don't require them yet
@@ -150,21 +154,33 @@ export async function assertCanTransition(case_: ProcurementCase, nextState: Cas
       if (!pq?.passed) throw new Error('Passed Post-Qualification required before BAC Resolution/Award');
     }
     // Infrastructure-specific prerequisites
-    if (nextState === 'PROGRESS_BILLING') {
+    if (nextState === 'PROGRESS_BILLING' && current === 'NTP_ISSUED') {
+      // Only check NTP when coming from NTP_ISSUED (first billing)
+      // Subsequent billings come from PMT_INSPECTION and don't need NTP check
       const ntp = await prisma.noticeToProceed.findUnique({ where: { caseId } });
       if (!ntp) throw new Error('NTP required before Progress Billing');
     }
     if (nextState === 'PMT_INSPECTION') {
-      const pb = await prisma.progressBilling.findUnique({ where: { caseId } });
-      if (!pb) throw new Error('Progress Billing required before PMT Inspection');
+      const pbCount = await prisma.progressBilling.count({ where: { caseId } });
+      if (pbCount === 0) throw new Error('Progress Billing required before PMT Inspection');
     }
     if (nextState === 'ORS') {
-      const pmt = await prisma.pMTInspectionReport.findUnique({ where: { caseId } });
-      if (!pmt || pmt.status !== 'PASSED') throw new Error('PMT Inspection PASSED before ORS');
+      const pmtInspections = await prisma.pMTInspectionReport.findMany({
+        where: { caseId },
+        orderBy: { inspectedAt: 'desc' },
+        take: 1,
+      });
+      const latestPMT = pmtInspections[0];
+      if (!latestPMT || latestPMT.status !== 'PASSED')
+        throw new Error('PMT Inspection PASSED before ORS');
     }
   }
 
   // Common tail prerequisites
+  if (nextState === 'PO_APPROVED') {
+    const award = await prisma.award.findUnique({ where: { caseId } });
+    if (!award) throw new Error('Award is required before Purchase Order');
+  }
   if (nextState === 'CONTRACT_SIGNED') {
     const award = await prisma.award.findUnique({ where: { caseId } });
     if (!award) throw new Error('Award is required before Contract Signing');
@@ -186,8 +202,13 @@ export async function assertCanTransition(case_: ProcurementCase, nextState: Cas
   }
   if (nextState === 'ACCEPTANCE') {
     if (method === 'INFRASTRUCTURE') {
-      const pmt = await prisma.pMTInspectionReport.findUnique({ where: { caseId } });
-      if (!pmt || pmt.status !== 'PASSED') {
+      const pmtInspections = await prisma.pMTInspectionReport.findMany({
+        where: { caseId },
+        orderBy: { inspectedAt: 'desc' },
+        take: 1,
+      });
+      const latestPMT = pmtInspections[0];
+      if (!latestPMT || latestPMT.status !== 'PASSED') {
         throw new Error('PMT Inspection PASSED required before Acceptance');
       }
     } else {

@@ -3,12 +3,12 @@
 import { EntityEditDelete } from '@/components/app/EntityEditDelete';
 import { useEditDeleteAccess } from '@/hooks/useEditDeleteAccess';
 import type { Role } from '@/lib/permissions';
-import type { ProcurementCase, DV } from '@/generated/prisma';
+import type { ProcurementCase, DV, Check } from '@/generated/prisma';
 
 type AccountingEditDeleteProps = {
   caseData: ProcurementCase & {
     dv?: DV | null;
-    check?: { id: string } | null;
+    check?: Check | null;
   };
   userRole: Role;
 };

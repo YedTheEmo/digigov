@@ -15,11 +15,11 @@ export function Table({ children, className = '', striped = false }: TableProps)
 }
 
 export function THead({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return <thead className={`bg-gray-50 dark:bg-[#1a1d23] ${className}`}>{children}</thead>;
+  return <thead className={`bg-[var(--color-bg-tertiary)] ${className}`}>{children}</thead>;
 }
 
 export function TBody({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return <tbody className={`divide-y divide-gray-100 dark:divide-[#2d3139] ${className}`}>{children}</tbody>;
+  return <tbody className={`divide-y divide-[var(--color-border-primary)] ${className}`}>{children}</tbody>;
 }
 
 export interface TRProps {
@@ -32,7 +32,7 @@ export interface TRProps {
 export function TR({ children, className = '', hover = true, onClick }: TRProps) {
   return (
     <tr
-      className={`transition-colors ${hover ? 'hover:bg-gray-100 dark:hover:bg-gray-700/50' : ''} ${
+      className={`transition-colors ${hover ? 'hover:bg-[var(--color-bg-hover)]' : ''} ${
         onClick ? 'cursor-pointer' : ''
       } ${className}`}
       onClick={onClick}
@@ -52,21 +52,21 @@ export interface THProps {
 export function TH({ children, className = '', sortable = false, onSort }: THProps) {
   return (
     <th
-      className={`px-6 py-4 text-left text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider ${
-        sortable ? 'cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-700' : ''
+      className={`px-6 py-4 text-left text-sm font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider ${
+        sortable ? 'cursor-pointer select-none hover:bg-[var(--color-bg-hover)]' : ''
       } ${className}`}
       onClick={sortable ? onSort : undefined}
     >
       <div className="flex items-center gap-2">
         {children}
-        {sortable && <span className="text-gray-400">⇅</span>}
+        {sortable && <span className="text-[var(--color-text-tertiary)]">⇅</span>}
       </div>
     </th>
   );
 }
 
 export function TD({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return <td className={`px-6 py-4 text-gray-900 dark:text-gray-100 ${className}`}>{children}</td>;
+  return <td className={`px-6 py-4 text-[var(--color-text-primary)] ${className}`}>{children}</td>;
 }
 
 /* Add striped styling */

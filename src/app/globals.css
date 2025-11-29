@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  /* Light mode colors - gov.uk inspired professional palette */
+  /* Base tokens – default to Legacy Gov light palette */
   --color-bg-primary: #ffffff;
   --color-bg-secondary: #f9fafb;
   --color-bg-tertiary: #f3f4f6;
@@ -70,6 +70,7 @@
   --line-height-relaxed: 1.75;
 }
 
+/* Color mode: dark */
 .dark {
   --color-bg-primary: #1a1d23;
   --color-bg-secondary: #111318;
@@ -102,6 +103,155 @@
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.6);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.7);
+}
+
+/* Visual themes */
+
+/* Legacy Gov (default) is represented by the base tokens above. */
+
+/* Modern Hub – SaaS-style neutrals, softer cards, slightly larger radii */
+:root[data-visual-theme='modern-hub'] {
+  --color-bg-primary: #f8fafc;
+  --color-bg-secondary: #eef2f8;
+  --color-bg-tertiary: #e0e7f1;
+  --color-bg-hover: #dbe8ff;
+  --color-bg-accent: #eff6ff;
+
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #1f2937;
+  --color-text-tertiary: #475569;
+
+  --color-border-primary: #d5deeb;
+  --color-border-secondary: #c0ccdd;
+
+  --shadow-sm: 0 1px 2px 0 rgb(15 23 42 / 0.04);
+  --shadow-md: 0 10px 15px -3px rgb(15 23 42 / 0.12);
+  --shadow-lg: 0 25px 35px -10px rgb(15 23 42 / 0.18);
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.75rem;
+}
+
+.dark[data-visual-theme='modern-hub'] {
+  --color-bg-primary: #0b1220;
+  --color-bg-secondary: #070c16;
+  --color-bg-tertiary: #111827;
+  --color-bg-hover: #1b2435;
+  --color-bg-accent: #0f172a;
+
+  --color-text-primary: #f8fafc;
+  --color-text-secondary: #d1d7e6;
+  --color-text-tertiary: #9da9c3;
+
+  --color-border-primary: #1f2a3c;
+  --color-border-secondary: #2c3a52;
+
+  --shadow-sm: 0 1px 2px 0 rgb(3 7 18 / 0.5);
+  --shadow-md: 0 12px 24px -8px rgb(8 20 45 / 0.65);
+  --shadow-lg: 0 32px 48px -18px rgb(6 14 30 / 0.65);
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.75rem;
+}
+
+/* Brand color palettes – override primary/semantic tokens while keeping backgrounds from mode/theme */
+:root[data-palette='emerald'] {
+  --color-primary: #059669;
+  --color-primary-hover: #047857;
+  --color-primary-light: #ecfdf5;
+  --color-border-focus: #059669;
+  --color-success: #059669;
+  --color-success-light: #ecfdf5;
+  --color-info: #0ea5e9;
+  --color-info-light: #e0f2fe;
+}
+
+.dark[data-palette='emerald'] {
+  --color-primary: #10b981;
+  --color-primary-hover: #34d399;
+  --color-primary-light: #064e3b;
+  --color-border-focus: #10b981;
+  --color-success: #10b981;
+  --color-success-light: #064e3b;
+  --color-info: #38bdf8;
+  --color-info-light: #0c4a6e;
+}
+
+:root[data-palette='blue'] {
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-primary-light: #eff6ff;
+  --color-border-focus: #2563eb;
+  --color-success: #16a34a;
+  --color-success-light: #ecfdf5;
+  --color-info: #2563eb;
+  --color-info-light: #eff6ff;
+}
+
+.dark[data-palette='blue'] {
+  --color-primary: #3b82f6;
+  --color-primary-hover: #60a5fa;
+  --color-primary-light: #1e3a8a;
+  --color-border-focus: #3b82f6;
+  --color-success: #22c55e;
+  --color-success-light: #064e3b;
+  --color-info: #3b82f6;
+  --color-info-light: #1e3a8a;
+}
+
+:root[data-palette='violet'] {
+  --color-primary: #7c3aed;
+  --color-primary-hover: #6d28d9;
+  --color-primary-light: #f5f3ff;
+  --color-border-focus: #7c3aed;
+  --color-success: #22c55e;
+  --color-success-light: #ecfdf5;
+  --color-info: #6366f1;
+  --color-info-light: #eef2ff;
+}
+
+.dark[data-palette='violet'] {
+  --color-primary: #8b5cf6;
+  --color-primary-hover: #a78bfa;
+  --color-primary-light: #4c1d95;
+  --color-border-focus: #8b5cf6;
+  --color-success: #22c55e;
+  --color-success-light: #064e3b;
+  --color-info: #818cf8;
+  --color-info-light: #3730a3;
+}
+
+:root[data-palette='neutral'] {
+  --color-primary: #4b5563;
+  --color-primary-hover: #374151;
+  --color-primary-light: #f3f4f6;
+  --color-border-focus: #4b5563;
+  --color-success: #16a34a;
+  --color-success-light: #ecfdf5;
+  --color-info: #374151;
+  --color-info-light: #e5e7eb;
+}
+
+.dark[data-palette='neutral'] {
+  --color-primary: #6b7280;
+  --color-primary-hover: #9ca3af;
+  --color-primary-light: #1f2937;
+  --color-border-focus: #6b7280;
+  --color-success: #22c55e;
+  --color-success-light: #064e3b;
+  --color-info: #6b7280;
+  --color-info-light: #1f2937;
+}
+
+/* Density controls – primarily affect spacing tokens used in custom layouts */
+:root[data-density='compact'] {
+  --spacing-2: 0.75rem;  /* 12px */
+  --spacing-3: 1.25rem;  /* 20px */
+  --spacing-4: 1.75rem;  /* 28px */
+  --spacing-5: 2.25rem;  /* 36px */
+  --spacing-6: 2.5rem;   /* 40px */
 }
 
 /* Box sizing & reset */
@@ -147,9 +297,17 @@ li {
   margin-bottom: var(--spacing-1);
 }
 
-section, header, main, footer, article {
+section, footer, article {
   margin-top: var(--spacing-4);
   margin-bottom: var(--spacing-4);
+}
+
+main {
+  margin: 0;
+}
+
+header {
+  margin: 0;
 }
 
 /* Focus styles for accessibility */

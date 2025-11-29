@@ -44,15 +44,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     );
   }
 
-  const created = await prisma.pMTInspectionReport.upsert({
-    where: { caseId },
-    update: {
-      status: parsed.data.status ?? null,
-      inspector: parsed.data.inspector ?? null,
-      inspectedAt: parsed.data.inspectedAt ? new Date(parsed.data.inspectedAt) : new Date(),
-      notes: parsed.data.notes ?? null,
-    },
-    create: {
+  const created = await prisma.pMTInspectionReport.create({
+    data: {
       caseId,
       status: parsed.data.status ?? null,
       inspector: parsed.data.inspector ?? null,

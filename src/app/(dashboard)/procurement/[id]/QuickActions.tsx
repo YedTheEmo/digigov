@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from 'react';
+import { useTransition } from 'react';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -151,7 +151,7 @@ export function QuickActions({
                 label="RFQ Issue Date"
                 className="w-auto"
               />
-              <Button type="submit" variant="primary" size="sm" disabled={isPending}>
+              <Button type="submit" variant="primary" size="sm" disabled={isPending} data-testid="btn-issue-rfq">
                 Issue RFQ
               </Button>
             </form>
@@ -173,7 +173,7 @@ export function QuickActions({
                 label="Posting End Date (min 7 days)"
                 className="w-auto"
               />
-              <Button type="submit" variant="primary" size="sm" disabled={isPending}>
+              <Button type="submit" variant="primary" size="sm" disabled={isPending} data-testid="btn-start-posting">
                 Start Posting
               </Button>
             </form>
@@ -252,7 +252,7 @@ export function QuickActions({
               label="Notice of Award Date"
               className="w-auto"
             />
-            <Button type="submit" variant="primary" size="sm" disabled={isPending}>
+            <Button type="submit" variant="primary" size="sm" disabled={isPending} data-testid="btn-award">
               Award
             </Button>
           </form>

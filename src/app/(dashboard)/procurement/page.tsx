@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import { revalidatePath } from 'next/cache';
@@ -9,6 +10,10 @@ import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
 import { logActivity } from '@/lib/activity';
 import type { ProcurementMethod, Prisma, CaseState } from '@/generated/prisma';
+
+export const metadata: Metadata = {
+  title: 'Procurement',
+};
 
 async function createCase(formData: FormData): Promise<{ success: boolean; id?: string; error?: string }> {
   'use server';
@@ -122,23 +127,24 @@ export default async function ProcurementPage({
   const cases = await prisma.procurementCase.findMany({ where, orderBy });
 
   return (
-    <div className="space-y-10 w-full animate-fade-in">
+    <div className="w-full space-y-8 animate-fade-in">
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-8 animate-slide-right">
-        <div className="flex-1 min-w-0">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4 leading-tight">
-            Procurement Cases
-          </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
-            Manage and track all procurement activities
-          </p>
-        </div>
-      </div>
+      <section className="space-y-2">
+        <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[var(--color-text-tertiary)]">
+          Procurement Workspace
+        </p>
+        <h1 className="text-3xl font-bold leading-tight text-[var(--color-text-primary)]">
+          Manage procurement cases end-to-end
+        </h1>
+        <p className="text-sm text-[var(--color-text-secondary)] max-w-3xl">
+          Create and manage procurement cases across the full workflow, from initial posting through to contract signing and notice to proceed.
+        </p>
+      </section>
 
       {/* Create New Case Card */}
-      <Card className="card-animated animate-slide-up">
-        <CardHeader>
-          <CardTitle>Create New Case</CardTitle>
+      <Card className="border-[var(--color-border-primary)] shadow-none">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-[var(--color-text-primary)]">Create New Case</CardTitle>
           <CardDescription>Start a new procurement process</CardDescription>
         </CardHeader>
         <CardContent>
@@ -177,11 +183,11 @@ export default async function ProcurementPage({
       </Card>
 
       {/* Cases List */}
-      <Card className="card-animated animate-slide-up [animation-delay:100ms]">
-        <CardHeader>
+      <Card className="border-[var(--color-border-primary)] shadow-none">
+        <CardHeader className="space-y-1">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-8">
             <div className="flex-1 min-w-0">
-              <CardTitle>All Cases</CardTitle>
+              <CardTitle className="text-[var(--color-text-primary)]">All Cases</CardTitle>
               <CardDescription className="mt-2">
                 {cases.length} {search || method !== 'ALL' || state !== 'ALL' ? 'matching' : 'total'} case{cases.length !== 1 ? 's' : ''}
               </CardDescription>
@@ -189,7 +195,7 @@ export default async function ProcurementPage({
             <div className="flex items-center gap-3 flex-shrink-0 flex-wrap">
               <form action="" method="GET" className="flex items-center gap-3 flex-wrap md:flex-nowrap">
                 <div className="relative w-full md:w-64">
-                  <svg className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-tertiary)] pointer-events-none z-10 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                   <input
@@ -197,14 +203,14 @@ export default async function ProcurementPage({
                     name="search"
                     defaultValue={search}
                     placeholder="Search cases..."
-                    className="w-full border border-gray-300 dark:border-[#3a3f4a] rounded-lg pl-10 pr-3 py-2 text-sm bg-white dark:bg-[#242830] text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-600/20 focus:border-green-600 hover:border-gray-400 dark:hover:border-gray-500"
+                    className="w-full border border-[var(--color-border-primary)] rounded-lg pl-10 pr-3 py-2 text-sm bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] placeholder-[var(--color-text-tertiary)] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--color-border-focus)]/20 focus:border-[var(--color-border-focus)] hover:border-[var(--color-border-secondary)]"
                   />
                 </div>
                 
                 <select
                   name="method"
                   defaultValue={method || 'ALL'}
-                  className="border border-gray-300 dark:border-[#3a3f4a] rounded-lg px-3 py-2 text-sm bg-white dark:bg-[#242830] text-gray-900 dark:text-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-600/20 focus:border-green-600 hover:border-gray-400 dark:hover:border-gray-500"
+                  className="border border-[var(--color-border-primary)] rounded-lg px-3 py-2 text-sm bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--color-border-focus)]/20 focus:border-[var(--color-border-focus)] hover:border-[var(--color-border-secondary)]"
                 >
                   <option value="ALL">All Methods</option>
                   <option value="SMALL_VALUE_RFQ">Small Value</option>
@@ -215,7 +221,7 @@ export default async function ProcurementPage({
                 <select
                   name="state"
                   defaultValue={state || 'ALL'}
-                  className="border border-gray-300 dark:border-[#3a3f4a] rounded-lg px-3 py-2 text-sm bg-white dark:bg-[#242830] text-gray-900 dark:text-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-600/20 focus:border-green-600 hover:border-gray-400 dark:hover:border-gray-500"
+                  className="border border-[var(--color-border-primary)] rounded-lg px-3 py-2 text-sm bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--color-border-focus)]/20 focus:border-[var(--color-border-focus)] hover:border-[var(--color-border-secondary)]"
                 >
                   <option value="ALL">All States</option>
                   <option value="DRAFT">Draft</option>
@@ -240,7 +246,7 @@ export default async function ProcurementPage({
                 <select
                   name="sort"
                   defaultValue={sort || 'newest'}
-                  className="border border-gray-300 dark:border-[#3a3f4a] rounded-lg px-3 py-2 text-sm bg-white dark:bg-[#242830] text-gray-900 dark:text-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-600/20 focus:border-green-600 hover:border-gray-400 dark:hover:border-gray-500"
+                  className="border border-[var(--color-border-primary)] rounded-lg px-3 py-2 text-sm bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--color-border-focus)]/20 focus:border-[var(--color-border-focus)] hover:border-[var(--color-border-secondary)]"
                 >
                   <option value="newest">Newest First</option>
                   <option value="oldest">Oldest First</option>
@@ -251,7 +257,7 @@ export default async function ProcurementPage({
                 <select
                   name="filter"
                   defaultValue={filterMode}
-                  className="border border-gray-300 dark:border-[#3a3f4a] rounded-lg px-3 py-2 text-sm bg-white dark:bg-[#242830] text-gray-900 dark:text-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-600/20 focus:border-green-600 hover:border-gray-400 dark:hover:border-gray-500"
+                  className="border border-[var(--color-border-primary)] rounded-lg px-3 py-2 text-sm bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--color-border-focus)]/20 focus:border-[var(--color-border-focus)] hover:border-[var(--color-border-secondary)]"
                 >
                   <option value="pre-procurement">In Progress</option>
                   <option value="post-procurement">Past Procurement</option>
@@ -302,7 +308,7 @@ export default async function ProcurementPage({
                 <Link
                   key={c.id}
                   href={`/procurement/${c.id}`}
-                  className="flex flex-col md:flex-row md:items-center md:justify-between px-10 py-7 hover:bg-gray-50 dark:hover:bg-[#242830] transition-all duration-250 group gap-5"
+                  className="flex flex-col md:flex-row md:items-center md:justify-between px-10 py-7 hover:bg-[var(--color-bg-hover)] transition-all duration-250 group gap-5"
                   style={{ 
                     animation: `slideInUp 350ms cubic-bezier(0.34, 1.56, 0.64, 1)`,
                     animationDelay: `${index * 50}ms`,
@@ -311,14 +317,14 @@ export default async function ProcurementPage({
                 >
                   <div className="flex-1 min-w-0 space-y-4">
                     <div className="flex flex-wrap items-center gap-4">
-                      <h3 className="font-semibold text-lg text-gray-900 dark:text-gray-100 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors duration-200 leading-snug">
+                      <h3 className="font-semibold text-lg text-[var(--color-text-primary)] group-hover:text-[var(--color-primary)] transition-colors duration-200 leading-snug">
                         {c.title}
                       </h3>
                       <Badge variant={c.method === 'PUBLIC_BIDDING' ? 'info' : 'default'} size="sm" className="transition-transform group-hover:scale-105">
                         {c.method === 'SMALL_VALUE_RFQ' ? 'Small Value' : 'Public Bidding'}
                       </Badge>
                     </div>
-                  <div className="flex flex-wrap items-center gap-4 text-base text-gray-600 dark:text-gray-400 leading-relaxed">
+                  <div className="flex flex-wrap items-center gap-4 text-base text-[var(--color-text-secondary)] leading-relaxed">
                     <Badge
                       variant={getStateVariant(c.currentState as string)}
                       size="sm"
@@ -327,7 +333,7 @@ export default async function ProcurementPage({
                     >
                       {c.currentState}
                     </Badge>
-                    <span className="hidden md:inline text-gray-300 dark:text-gray-600">•</span>
+                    <span className="hidden md:inline text-[var(--color-border-secondary)]">•</span>
                     <span className="flex items-center gap-2">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
@@ -344,7 +350,7 @@ export default async function ProcurementPage({
                       })}
                     </span>
                   </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                  <div className="text-sm text-[var(--color-text-secondary)]">
                     Method:{' '}
                     {c.method === 'SMALL_VALUE_RFQ'
                       ? 'Small Value RFQ'
@@ -353,7 +359,7 @@ export default async function ProcurementPage({
                       : 'Public Bidding'}
                   </div>
                   </div>
-                  <div className="flex items-center gap-3 text-gray-400 group-hover:text-green-600 dark:group-hover:text-green-400 transition-all duration-200 flex-shrink-0 self-end md:self-center">
+                  <div className="flex items-center gap-3 text-[var(--color-text-tertiary)] group-hover:text-[var(--color-primary)] transition-all duration-200 flex-shrink-0 self-end md:self-center">
                     <span className="text-base font-medium">View Details</span>
                     <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

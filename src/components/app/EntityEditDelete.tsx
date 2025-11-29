@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Modal, ModalHeader, ModalBody, ModalFooter } from '@/components/ui/modal';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 type EntityEditDeleteProps = {
   entityName: string;
@@ -85,7 +85,7 @@ export function EntityEditDelete({
         router.refresh();
         onSuccess?.();
       });
-    } catch (error) {
+    } catch {
       toast.error(`Failed to update ${entityDisplayName}`);
     }
   };
@@ -119,13 +119,17 @@ export function EntityEditDelete({
         router.refresh();
         onSuccess?.();
       });
-    } catch (error) {
+    } catch {
       toast.error(`Failed to delete ${entityDisplayName}`);
     }
   };
 
   const content = (
-    <div className="space-y-4">
+    <div
+      className="space-y-4"
+      data-entity={entityName}
+      data-case-id={caseId}
+    >
       {/* Status Badge */}
       <div className="flex items-center gap-2">
         <Badge variant={exists ? 'info' : 'pending'}>
@@ -141,8 +145,8 @@ export function EntityEditDelete({
       {/* Current Data Display */}
       {exists && currentData && Object.keys(currentData).length > 0 && (
         <div className="space-y-2">
-          <div className="text-sm font-medium text-gray-700 dark:text-gray-300">Current Values:</div>
-          <div className="bg-gray-50 dark:bg-gray-800 rounded p-3 space-y-1">
+          <div className="text-sm font-medium text-[var(--color-text-primary)]">Current Values:</div>
+          <div className="bg-[var(--color-bg-tertiary)] rounded-lg p-3 space-y-1 border border-[var(--color-border-secondary)]">
             {fields.map(field => {
               const value = currentData[field.name];
               if (value === null || value === undefined) return null;
@@ -158,8 +162,8 @@ export function EntityEditDelete({
 
               return (
                 <div key={field.name} className="text-sm">
-                  <span className="font-medium text-gray-600 dark:text-gray-400">{field.label}:</span>{' '}
-                  <span className="text-gray-900 dark:text-gray-100">{displayValue}</span>
+                  <span className="font-medium text-[var(--color-text-secondary)]">{field.label}:</span>{' '}
+                  <span className="text-[var(--color-text-primary)]">{displayValue}</span>
                 </div>
               );
             })}
@@ -172,7 +176,7 @@ export function EntityEditDelete({
         <div className="flex gap-2">
           {canEdit && (
             <Button
-              variant="primary"
+              variant="outline"
               size="sm"
               onClick={() => setIsEditOpen(true)}
               disabled={isPending}
@@ -182,7 +186,7 @@ export function EntityEditDelete({
           )}
           {canDelete && (
             <Button
-              variant="danger"
+              variant="destructive"
               size="sm"
               onClick={() => setIsDeleteOpen(true)}
               disabled={isPending}
@@ -191,7 +195,7 @@ export function EntityEditDelete({
             </Button>
           )}
           {!canEdit && !canDelete && (
-            <div className="text-sm text-gray-500 dark:text-gray-400">
+            <div className="text-sm text-[var(--color-text-tertiary)]">
               No edit/delete permissions
             </div>
           )}
@@ -199,27 +203,27 @@ export function EntityEditDelete({
       )}
 
       {!exists && (
-        <div className="text-sm text-gray-500 dark:text-gray-400">
+        <div className="text-sm text-[var(--color-text-tertiary)]">
           This entity has not been created yet.
         </div>
       )}
 
       {/* Edit Modal */}
-      <Modal isOpen={isEditOpen} onClose={() => setIsEditOpen(false)}>
+      <Modal open={isEditOpen} onClose={() => setIsEditOpen(false)}>
         <form action={(formData) => handleEdit(formData)}>
           <ModalHeader>Edit {entityDisplayName}</ModalHeader>
           <ModalBody>
             <div className="space-y-4">
               {fields.map(field => (
                 <div key={field.name}>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-[var(--color-text-primary)] mb-1">
                     {field.label}
-                    {field.required && <span className="text-red-500 ml-1">*</span>}
+                    {field.required && <span className="text-[var(--color-danger)] ml-1">*</span>}
                   </label>
                   {field.type === 'textarea' ? (
                     <textarea
                       name={field.name}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                      className="w-full px-3 py-2 border border-[var(--color-border-primary)] rounded-md bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)]"
                       defaultValue={currentData[field.name] as string || ''}
                       placeholder={field.placeholder}
                       required={field.required}
@@ -237,8 +241,8 @@ export function EntityEditDelete({
                 </div>
               ))}
               {isLocked && (
-                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded p-3">
-                  <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                <div className="bg-[var(--color-warning-light)] border border-[var(--color-warning)] rounded-lg p-3">
+                  <p className="text-sm text-[var(--color-text-primary)]">
                     <strong>Warning:</strong> {lockedReason || 'This entity is locked due to downstream data.'}
                     {' '}Only admins can edit locked entities.
                   </p>
@@ -263,34 +267,34 @@ export function EntityEditDelete({
       </Modal>
 
       {/* Delete Modal */}
-      <Modal isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)}>
+      <Modal open={isDeleteOpen} onClose={() => setIsDeleteOpen(false)}>
         <ModalHeader>Delete {entityDisplayName}</ModalHeader>
         <ModalBody>
           <div className="space-y-4">
             {deleteWarning && (
-              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded p-3">
-                <p className="text-sm text-red-800 dark:text-red-200">
+              <div className="bg-[var(--color-danger-light)] border border-[var(--color-danger)] rounded-lg p-3">
+                <p className="text-sm text-[var(--color-text-primary)]">
                   <strong>Breaking Change Warning:</strong> {deleteWarning}
                 </p>
               </div>
             )}
             {isLocked && (
-              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded p-3">
-                <p className="text-sm text-yellow-800 dark:text-yellow-200">
+              <div className="bg-[var(--color-warning-light)] border border-[var(--color-warning)] rounded-lg p-3">
+                <p className="text-sm text-[var(--color-text-primary)]">
                   <strong>Warning:</strong> {lockedReason || 'This entity is locked due to downstream data.'}
                   {' '}Only admins can delete locked entities.
                 </p>
               </div>
             )}
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-sm text-[var(--color-text-secondary)]">
               Are you sure you want to delete this {entityDisplayName}? This action will be logged in the activity history.
             </p>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Reason for Deletion <span className="text-red-500">*</span>
+              <label className="block text-sm font-medium text-[var(--color-text-primary)] mb-1">
+                Reason for Deletion <span className="text-[var(--color-danger)]">*</span>
               </label>
               <textarea
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                className="w-full px-3 py-2 border border-[var(--color-border-primary)] rounded-md bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)]"
                 value={deleteReason}
                 onChange={(e) => setDeleteReason(e.target.value)}
                 placeholder="Explain why this entity is being deleted..."
@@ -311,7 +315,7 @@ export function EntityEditDelete({
           </Button>
           <Button
             type="button"
-            variant="danger"
+            variant="destructive"
             onClick={handleDelete}
             disabled={isPending || !deleteReason.trim()}
           >
@@ -324,9 +328,10 @@ export function EntityEditDelete({
 
   if (showInCard) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>{entityDisplayName}</CardTitle>
+      <Card className="border-[var(--color-border-primary)] shadow-none">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-[var(--color-text-primary)]">{entityDisplayName}</CardTitle>
+          <CardDescription>Manage {entityDisplayName.toLowerCase()} data</CardDescription>
         </CardHeader>
         <CardContent>
           {content}

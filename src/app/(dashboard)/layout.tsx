@@ -14,18 +14,15 @@ export default async function DashboardLayout({ children }: Readonly<{ children:
   }
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#0d0f12]">
+    <div className="flex h-screen w-full overflow-hidden bg-[var(--color-bg-secondary)]">
       <Sidebar role={role} />
-      <div className="flex flex-col flex-1 overflow-hidden relative" style={{ backgroundColor: '#1a1d23' }}>
+      <div className="flex flex-col flex-1 overflow-hidden bg-[var(--color-bg-secondary)]">
         <Header userName={user?.name || undefined} userEmail={user?.email || undefined} />
         <main
           id="main-content"
-          className="flex-1 overflow-y-auto border-t-2 border-gray-300 dark:border-gray-700"
-          style={{ backgroundColor: '#0d0f12', marginTop: '8px' }}
+          className="flex-1 overflow-y-auto bg-[var(--color-bg-primary)] container-content"
         >
-          <div className="px-8 pt-4 pb-4 md:pt-8 md:pb-8 lg:px-12 w-full max-w-[1920px] mx-auto">
-            {children}
-          </div>
+          {children}
         </main>
       </div>
     </div>

@@ -25,6 +25,11 @@
 - [Spinner](#spinner)
 - [Empty State](#empty-state)
 - [Skeleton](#skeleton)
+- [Sidebar](#sidebar)
+- [Header](#header)
+- [Global Search](#global-search)
+- [AI Assistant Panel](#ai-assistant-panel)
+- [Settings Panel](#settings-panel)
 
 ---
 
@@ -1147,4 +1152,108 @@ xl:  1280px  /* Desktops */
 **Last Updated:** November 2025  
 **Design System Version:** 1.0.0  
 **Application:** DigiGov
+
+---
+
+## Sidebar
+
+### Visual Specifications
+
+- **Variations:**
+  - **Collapsed (icon rail):** 72px wide, icon-only, labels shown in flyouts and tooltips.
+  - **Expanded:** 224px wide, icon + label visible.
+- **Background:** Dark neutral (`#0d0f12` / `#1a1d23`), contrasting with content surface.
+- **Icons:** 20px vector icons, centered in 36px–40px rounded containers.
+- **Active State:** Green indicator bar on the left, elevated icon background, and high-contrast text.
+
+### Behavior
+
+- **Hover Flyouts:** On hover/focus of a top-level icon, show a flyout menu listing related destinations grouped by function (e.g. Procurement, Finance, Insights, Admin).
+- **Role-Aware:** Items are filtered by user role; groups with no visible items are hidden.
+- **Keyboard:** Arrow keys move between icons and flyout items; <kbd>Esc</kbd> closes the flyout.
+- **Density:** Spacing uses global `data-density` (comfortable/compact) tokens.
+
+---
+
+## Header
+
+### Visual Specifications
+
+- **Height:** 72–88px.
+- **Layout:** Left-aligned brand + breadcrumbs, right-aligned cluster of program search, AI assistant trigger, and user menu.
+- **Background:** Semi-opaque dark surface (`bg-[#0f1117]/95`) with subtle blur; works across all themes.
+- **Content:**
+  - Brand token (DG) + app name.
+  - Optional primary workspace label.
+  - Breadcrumb trail for current module/case.
+  - Program-wide search pill.
+  - AI assistant button.
+  - User avatar + menu.
+
+### Behavior
+
+- **Responsive:** On narrow screens, breadcrumbs and text compress while actions remain accessible.
+- **Keyboard:** Search pill is focusable and clickable; user menu and AI trigger behave as standard buttons.
+
+---
+
+## Global Search
+
+### Visual Specifications
+
+- **Type:** Command-palette style overlay.
+- **Placement:** Centered modal, up to 480px wide.
+- **Structure:**
+  - Header row with search icon, input field, and shortcut hint (`Ctrl/Cmd + K`).
+  - Scrollable list of results.
+  - Footer helper text explaining scope.
+- **Background:** Dark elevated surface, border, and soft shadow for Modern Hub; neutral card style for Legacy Gov.
+
+### Behavior
+
+- **Scope:** Program structure and actions (workspaces, utilities, key routes), **not** individual case content.
+- **Triggers:** Header pill button and <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + <kbd>K</kbd> keyboard shortcut.
+- **Keyboard:** Arrow keys navigate, <kbd>Enter</kbd> activates, <kbd>Esc</kbd> or overlay click closes.
+- **Accessibility:** `role="dialog"` with `aria-modal="true"`; search field auto-focused on open.
+
+---
+
+## AI Assistant Panel
+
+### Visual Specifications
+
+- **Placement:** Right-side panel, 360–420px wide on desktop, full width on mobile.
+- **Sections:**
+  - Header with title and short description.
+  - Scrollable conversation body.
+  - Footer with prompt textarea and submit button.
+- **Background:** Dark neutral surface with subtle border and elevation in Modern Hub; standard card styling in Legacy Gov.
+
+### Behavior
+
+- **Entry:** Header button with AI badge.
+- **Mode:** Non-blocking; underlying page remains visible but not focused.
+- **Keyboard:** Focus is trapped inside panel while open; <kbd>Esc</kbd> and close icon dismiss.
+- **Accessibility:** `role="dialog"`; prompt input labeled and announced by screen readers.
+
+---
+
+## Settings Panel
+
+### Visual Specifications
+
+- **Form Factor:** Modal (using `Modal` component) sized `lg`.
+- **Sections:**
+  - Color mode (Light / Dark) segmented control.
+  - Visual theme (Modern Hub / Legacy Gov) card-style selector.
+  - Density (Comfortable / Compact) segmented control.
+  - Sidebar behavior (start collapsed) checkbox.
+- **Layout:** 3–4 stacked sections with concise copy and clear labels.
+
+### Behavior
+
+- **Access:** “Appearance & settings” entry in the user dropdown.
+- **Persistence:** Changes take effect immediately and are stored in `localStorage` (mode, theme, density, sidebar default).
+- **Keyboard:** Fully navigable via tab/shift-tab; controls use native inputs and buttons.
+- **Accessibility:** Uses `Modal` patterns for focus management and dismissal.
 

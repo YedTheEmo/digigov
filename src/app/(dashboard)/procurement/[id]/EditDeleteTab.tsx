@@ -19,8 +19,8 @@ type ProcurementEditDeleteProps = {
     preBid?: PreBidConference | null;
     twgEvaluation?: TWGEvaluation | null;
     postQualification?: PostQualification | null;
-    progressBilling?: ProgressBilling | null;
-    pmtInspection?: PMTInspectionReport | null;
+    progressBillings?: ProgressBilling[];
+    pmtInspections?: PMTInspectionReport[];
   };
   userRole: Role;
 };
@@ -35,7 +35,7 @@ export function EditDeleteTab({ caseData, userRole }: ProcurementEditDeleteProps
   const abstractAccess = useEditDeleteAccess({ role: userRole, action: 'abstract', caseData });
   const bacAccess = useEditDeleteAccess({ role: userRole, action: 'bac_resolution', caseData });
   const awardAccess = useEditDeleteAccess({ role: userRole, action: 'award', caseData });
-  const purchaseOrderAccess = useEditDeleteAccess({ role: userRole, action: 'purchase_order', caseData });
+  const purchaseOrderAccess = useEditDeleteAccess({ role: userRole, action: 'contract', caseData });
   const contractAccess = useEditDeleteAccess({ role: userRole, action: 'contract', caseData });
   const ntpAccess = useEditDeleteAccess({ role: userRole, action: 'ntp', caseData });
   const quotationAccess = useEditDeleteAccess({ role: userRole, action: 'quotation', caseData });
@@ -366,16 +366,16 @@ export function EditDeleteTab({ caseData, userRole }: ProcurementEditDeleteProps
       />
 
       {/* Progress Billing - For INFRASTRUCTURE */}
-      {isInfra && (
+      {isInfra && caseData.progressBillings && caseData.progressBillings.length > 0 && (
         <EntityEditDelete
           entityName="progress-billing"
-          entityDisplayName="Progress Billing"
-          exists={!!caseData.progressBilling}
-          currentData={caseData.progressBilling ? {
-            billingNo: caseData.progressBilling.billingNo,
-            amount: caseData.progressBilling.amount?.toString(),
-            billedAt: caseData.progressBilling.billedAt,
-          } : {}}
+          entityDisplayName={`Progress Billing (${caseData.progressBillings.length} total)`}
+          exists={true}
+          currentData={{
+            billingNo: caseData.progressBillings[caseData.progressBillings.length - 1]?.billingNo,
+            amount: caseData.progressBillings[caseData.progressBillings.length - 1]?.amount?.toString(),
+            billedAt: caseData.progressBillings[caseData.progressBillings.length - 1]?.billedAt,
+          }}
           fields={[
             { name: 'billingNo', label: 'Billing Number', type: 'text', placeholder: 'BILL-2024-001' },
             { name: 'amount', label: 'Amount', type: 'number', placeholder: '100000.00' },
@@ -392,16 +392,16 @@ export function EditDeleteTab({ caseData, userRole }: ProcurementEditDeleteProps
       )}
 
       {/* PMT Inspection - For INFRASTRUCTURE */}
-      {isInfra && (
+      {isInfra && caseData.pmtInspections && caseData.pmtInspections.length > 0 && (
         <EntityEditDelete
           entityName="pmt-inspection"
-          entityDisplayName="PMT Inspection Report"
-          exists={!!caseData.pmtInspection}
-          currentData={caseData.pmtInspection ? {
-            status: caseData.pmtInspection.status,
-            inspector: caseData.pmtInspection.inspector,
-            inspectedAt: caseData.pmtInspection.inspectedAt,
-          } : {}}
+          entityDisplayName={`PMT Inspection Report (${caseData.pmtInspections.length} total)`}
+          exists={true}
+          currentData={{
+            status: caseData.pmtInspections[caseData.pmtInspections.length - 1]?.status,
+            inspector: caseData.pmtInspections[caseData.pmtInspections.length - 1]?.inspector,
+            inspectedAt: caseData.pmtInspections[caseData.pmtInspections.length - 1]?.inspectedAt,
+          }}
           fields={[
             { name: 'status', label: 'Status', type: 'text', placeholder: 'PASSED or FAILED' },
             { name: 'inspector', label: 'Inspector', type: 'text', placeholder: 'Inspector name' },

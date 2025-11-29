@@ -115,6 +115,22 @@ export const theme = {
       },
     },
   },
+  /**
+   * Named visual themes that correspond to the design guide.
+   * These are layered on top of light/dark mode using CSS variables.
+   */
+  visualThemes: {
+    'legacy-gov': {
+      description: 'Gov.uk-inspired professional theme with sharper corners and current green palette.',
+      cardRadius: '0.5rem',
+      cardShadow: 'var(--shadow-sm)',
+    },
+    'modern-hub': {
+      description: 'HubSpot-inspired SaaS theme with softer neutrals, elevated cards, and increased white space.',
+      cardRadius: '0.75rem',
+      cardShadow: 'var(--shadow-md)',
+    },
+  },
   spacing: {
     0: '0',
     1: '0.25rem',   // 4px

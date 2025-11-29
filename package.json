@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+    "dev": "next dev",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "prisma:generate": "prisma generate",
@@ -13,15 +13,20 @@
     "prisma:deploy": "prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
     "test": "npm run test:unit && npm run test:integration",
-    "test:unit": "tsx tests/unit/permissions.test.ts",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
+    "test:unit:coverage": "vitest run --coverage",
+    "test:unit:ui": "vitest --ui",
     "test:integration": "tsx tests/integration/edit-delete.test.ts",
     "test:e2e": "tsx tests/e2e/run-workflows.ts",
     "test:e2e:contracts": "tsx tests/e2e/contracts.ts",
-    "test:ui": "playwright test"
+    "test:ui": "playwright test",
+    "test:comprehensive": "npx playwright test tests/ui/rfq-comprehensive.spec.ts tests/ui/infrastructure-comprehensive.spec.ts tests/ui/public-bidding-comprehensive.spec.ts --reporter=line"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.0",
     "@prisma/client": "^6.17.1",
+    "@radix-ui/react-slot": "^1.2.4",
     "bcryptjs": "^3.0.2",
     "next": "15.5.6",
     "next-auth": "^4.24.11",
@@ -33,16 +38,27 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@faker-js/faker": "^9.3.0",
     "@playwright/test": "^1.56.1",
     "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@testing-library/user-event": "^14.5.2",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^4.3.4",
+    "@vitest/coverage-v8": "^2.1.8",
+    "@vitest/ui": "^2.1.8",
     "eslint": "^9",
     "eslint-config-next": "15.5.6",
+    "jsdom": "^25.0.1",
+    "lightningcss": "^1.30.2",
+    "msw": "^2.6.4",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.6",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^2.1.8"
   }
 }

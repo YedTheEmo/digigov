@@ -1,52 +1,51 @@
 import * as React from 'react';
 
 type Variant = 'default' | 'primary' | 'success' | 'warning' | 'error' | 'info' | 'pending' | 'completed' | 'cancelled';
-type Style = 'solid' | 'outline';
+type BadgeStyle = 'solid' | 'outline';
 type Size = 'sm' | 'md' | 'lg';
 
-export interface BadgeProps {
+export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   variant?: Variant;
-  style?: Style;
+  badgeStyle?: BadgeStyle;
   size?: Size;
   dot?: boolean;
-  className?: string;
   children: React.ReactNode;
 }
 
 const variantSolidClass: Record<Variant, string> = {
-  default: 'bg-gray-100 dark:bg-gray-700/50 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-600',
-  primary: 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-300 border border-green-200 dark:border-green-800',
-  success: 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-300 border border-green-200 dark:border-green-800',
-  warning: 'bg-orange-50 dark:bg-orange-900/20 text-orange-800 dark:text-orange-300 border border-orange-200 dark:border-orange-800',
-  error: 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-800',
-  info: 'bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-800',
-  pending: 'bg-orange-50 dark:bg-orange-900/20 text-orange-800 dark:text-orange-300 border border-orange-200 dark:border-orange-800',
-  completed: 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-300 border border-green-200 dark:border-green-800',
-  cancelled: 'bg-gray-100 dark:bg-gray-700/50 text-gray-800 dark:text-gray-300 border border-gray-200 dark:border-gray-600',
+  default: 'bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] border border-[var(--color-border-primary)]',
+  primary: 'bg-[var(--color-primary-light)] text-[var(--color-primary)] border border-[var(--color-primary)]',
+  success: 'bg-[var(--color-success-light)] text-[var(--color-success)] border border-[var(--color-success)]',
+  warning: 'bg-[var(--color-warning-light)] text-[var(--color-warning)] border border-[var(--color-warning)]',
+  error: 'bg-[var(--color-error-light)] text-[var(--color-error)] border border-[var(--color-error)]',
+  info: 'bg-[var(--color-info-light)] text-[var(--color-info)] border border-[var(--color-info)]',
+  pending: 'bg-[var(--color-warning-light)] text-[var(--color-warning)] border border-[var(--color-warning)]',
+  completed: 'bg-[var(--color-success-light)] text-[var(--color-success)] border border-[var(--color-success)]',
+  cancelled: 'bg-[var(--color-bg-tertiary)] text-[var(--color-text-tertiary)] border border-[var(--color-border-secondary)]',
 };
 
 const variantOutlineClass: Record<Variant, string> = {
-  default: 'border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200',
-  primary: 'border-green-300 dark:border-green-700 text-green-800 dark:text-green-300',
-  success: 'border-green-300 dark:border-green-700 text-green-800 dark:text-green-300',
-  warning: 'border-yellow-300 dark:border-yellow-700 text-yellow-800 dark:text-yellow-300',
-  error: 'border-red-300 dark:border-red-700 text-red-800 dark:text-red-300',
-  info: 'border-blue-300 dark:border-blue-700 text-blue-800 dark:text-blue-300',
-  pending: 'border-yellow-300 dark:border-yellow-700 text-yellow-800 dark:text-yellow-300',
-  completed: 'border-green-300 dark:border-green-700 text-green-800 dark:text-green-300',
-  cancelled: 'border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-300',
+  default: 'border-[var(--color-border-primary)] text-[var(--color-text-secondary)]',
+  primary: 'border-[var(--color-primary)] text-[var(--color-primary)]',
+  success: 'border-[var(--color-success)] text-[var(--color-success)]',
+  warning: 'border-[var(--color-warning)] text-[var(--color-warning)]',
+  error: 'border-[var(--color-error)] text-[var(--color-error)]',
+  info: 'border-[var(--color-info)] text-[var(--color-info)]',
+  pending: 'border-[var(--color-warning)] text-[var(--color-warning)]',
+  completed: 'border-[var(--color-success)] text-[var(--color-success)]',
+  cancelled: 'border-[var(--color-border-secondary)] text-[var(--color-text-tertiary)]',
 };
 
 const dotColorClass: Record<Variant, string> = {
-  default: 'bg-gray-500',
-  primary: 'bg-blue-500',
-  success: 'bg-green-500',
-  warning: 'bg-yellow-500',
-  error: 'bg-red-500',
-  info: 'bg-blue-500',
-  pending: 'bg-yellow-500',
-  completed: 'bg-green-500',
-  cancelled: 'bg-gray-500',
+  default: 'bg-[var(--color-text-tertiary)]',
+  primary: 'bg-[var(--color-primary)]',
+  success: 'bg-[var(--color-success)]',
+  warning: 'bg-[var(--color-warning)]',
+  error: 'bg-[var(--color-error)]',
+  info: 'bg-[var(--color-info)]',
+  pending: 'bg-[var(--color-warning)]',
+  completed: 'bg-[var(--color-success)]',
+  cancelled: 'bg-[var(--color-text-tertiary)]',
 };
 
 const sizeClass: Record<Size, string> = {
@@ -57,16 +56,18 @@ const sizeClass: Record<Size, string> = {
 
 export function Badge({
   variant = 'default',
-  style = 'solid',
+  badgeStyle = 'solid',
   size = 'md',
   dot = false,
   className = '',
   children,
+  ...props
 }: BadgeProps) {
-  const styleClass = style === 'solid' ? variantSolidClass[variant] : `border ${variantOutlineClass[variant]} bg-transparent`;
+  const styleClass = badgeStyle === 'solid' ? variantSolidClass[variant] : `border ${variantOutlineClass[variant]} bg-transparent`;
   
   return (
     <span
+      {...props}
       className={`inline-flex items-center gap-1.5 rounded-full font-medium ${styleClass} ${sizeClass[size]} ${className}`}
     >
       {dot && <span className={`w-1.5 h-1.5 rounded-full ${dotColorClass[variant]}`} />}

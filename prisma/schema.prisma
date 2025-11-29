@@ -181,8 +181,8 @@ model ProcurementCase {
   contract       Contract?
   ntp            NoticeToProceed?
   // Infrastructure branch
-  progressBilling ProgressBilling?
-  pmtInspection  PMTInspectionReport?
+  progressBillings ProgressBilling[]
+  pmtInspections  PMTInspectionReport[]
   deliveries     Delivery[]
   inspection     InspectionReport?
   acceptance     Acceptance?
@@ -285,24 +285,28 @@ model NoticeToProceed {
 
 model ProgressBilling {
   id          String           @id @default(cuid())
-  caseId      String           @unique
+  caseId      String
   billingNo   String?
   amount      Decimal?         @db.Decimal(18, 2)
   billedAt    DateTime?
   notes       String?
 
   case        ProcurementCase  @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId])
 }
 
 model PMTInspectionReport {
   id          String           @id @default(cuid())
-  caseId      String           @unique
+  caseId      String
   status      InspectionStatus?
   inspector   String?
   inspectedAt DateTime?
   notes       String?
 
   case        ProcurementCase  @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId])
 }
 
 model Delivery {

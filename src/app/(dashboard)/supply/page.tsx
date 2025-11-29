@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,6 +7,10 @@ import { EmptyState } from '@/components/ui/empty-state';
 import Link from 'next/link';
 import type { Prisma } from '@/generated/prisma';
 import type { CaseState } from '@/generated/prisma';
+
+export const metadata: Metadata = {
+  title: 'Supply Management',
+};
 
 const SUPPLY_STATES = [
   'NTP_ISSUED',

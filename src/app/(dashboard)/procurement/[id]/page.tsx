@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { auth } from '@/lib/nextauth';
@@ -54,7 +54,7 @@ export default async function CaseDetail(props: {
     purchaseOrder: true, contract: true, ntp: true, deliveries: true, inspection: true, acceptance: true,
     ors: true, dv: true, check: true, checkAdvice: true,
     bidBulletins: true, preBid: true, bids: true, twgEvaluation: true, postQualification: true,
-    progressBilling: true, pmtInspection: true,
+    progressBillings: true, pmtInspections: true,
     attachments: true,
     activityLogs: { orderBy: { createdAt: 'asc' } },
   };
@@ -462,7 +462,7 @@ export default async function CaseDetail(props: {
   }
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="w-full space-y-8 animate-fade-in">
       {/* Header */}
       <CaseHeader
         title={c.title}
@@ -472,18 +472,17 @@ export default async function CaseDetail(props: {
         backHref="/procurement"
       />
 
-
-      {/* Case Actions Card (unified) */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Case Actions</CardTitle>
-          {nextStepMessage && (
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+      {/* Next Step Guidance Card */}
+      {nextStepMessage && (
+        <Card className="border-[var(--color-border-primary)] shadow-none bg-[var(--color-bg-tertiary)]">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-[var(--color-text-primary)]">Next Steps</CardTitle>
+            <CardDescription>
               {nextStepMessage}{' '}
               {['NTP_ISSUED', 'DELIVERY', 'INSPECTION'].includes(c.currentState as string) && (
                 <Link
                   href="/supply"
-                  className="font-medium text-green-700 dark:text-green-400 hover:underline"
+                  className="font-medium text-[var(--color-primary)] hover:underline"
                 >
                   Open Supply module
                 </Link>
@@ -493,14 +492,22 @@ export default async function CaseDetail(props: {
                   {' '}
                   <Link
                     href="/budget"
-                    className="font-medium text-green-700 dark:text-green-400 hover:underline"
+                    className="font-medium text-[var(--color-primary)] hover:underline"
                   >
                     Open Budget module
                   </Link>
                 </>
               )}
-            </p>
-          )}
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      )}
+
+      {/* Case Actions Card (unified) */}
+      <Card className="border-[var(--color-border-primary)] shadow-none">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-[var(--color-text-primary)]">Case Actions</CardTitle>
+          <CardDescription>Manage procurement workflow steps and documentation</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Current step / primary actions (RFQ, Award, PO, Contract, NTP, etc.) */}
@@ -617,7 +624,7 @@ export default async function CaseDetail(props: {
                       <option value="Non-Responsive">Non-Responsive</option>
                     </Select>
                     <Input name="notes" placeholder="Notes" className="min-w-[200px]" />
-                    <Button type="submit" variant="secondary" size="sm">
+                    <Button type="submit" variant="secondary" size="sm" data-testid="btn-record-twg">
                       Record TWG Evaluation
                     </Button>
                   </form>
@@ -658,7 +665,7 @@ export default async function CaseDetail(props: {
               {c.method === 'INFRASTRUCTURE' && (
                 <div className="space-y-3">
                   {/* Progress Billing */}
-                  {c.currentState === 'NTP_ISSUED' && can(['PROCUREMENT_MANAGER', 'ADMIN']) && (
+                  {(c.currentState === 'NTP_ISSUED' || c.currentState === 'PROGRESS_BILLING' || c.currentState === 'PMT_INSPECTION') && can(['PROCUREMENT_MANAGER', 'ADMIN']) && (
                     <form action={recordProgressBilling} className="flex flex-wrap items-center gap-2">
                       <Input name="billingNo" placeholder="Billing No." className="w-40" />
                       <Input
@@ -761,14 +768,14 @@ export default async function CaseDetail(props: {
                   NTP Issued
                 </span>
               )}
-              {c.progressBilling && (
+              {c.progressBillings && c.progressBillings.length > 0 && (
                 <span className="inline-flex items-center rounded-full bg-gray-100 dark:bg-gray-800 px-2.5 py-1 text-xs font-medium text-gray-800 dark:text-gray-100">
-                  Progress Billing
+                  Progress Billing ({c.progressBillings.length})
                 </span>
               )}
-              {c.pmtInspection && (
+              {c.pmtInspections && c.pmtInspections.length > 0 && (
                 <span className="inline-flex items-center rounded-full bg-gray-100 dark:bg-gray-800 px-2.5 py-1 text-xs font-medium text-gray-800 dark:text-gray-100">
-                  PMT Inspection
+                  PMT Inspection ({c.pmtInspections.length})
                 </span>
               )}
               {c.method === 'SMALL_VALUE_RFQ' && c.abstract && (

@@ -43,15 +43,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     );
   }
 
-  const created = await prisma.progressBilling.upsert({
-    where: { caseId },
-    update: {
-      billingNo: billingNo ?? null,
-      amount: amount ?? null,
-      billedAt,
-      notes: body.notes ?? null,
-    },
-    create: {
+  const created = await prisma.progressBilling.create({
+    data: {
       caseId,
       billingNo: billingNo ?? null,
       amount: amount ?? null,

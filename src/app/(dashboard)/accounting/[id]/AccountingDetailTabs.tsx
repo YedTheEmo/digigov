@@ -8,7 +8,7 @@ import { Uploader } from '@/app/(dashboard)/procurement/[id]/Uploader';
 import { getActionMeta } from '@/lib/activityLabels';
 import { getAttachmentDisplayName } from '@/lib/attachments';
 import { ProgressStages } from '@/components/app/ProgressStages';
-import type { ProcurementCase, ActivityLog, Attachment, ORS, DV } from '@/generated/prisma';
+import type { ProcurementCase, ActivityLog, Attachment, ORS, DV, Check } from '@/generated/prisma';
 import { EditDeleteTab } from './EditDeleteTab';
 import type { Role } from '@/lib/permissions';
 
@@ -26,7 +26,7 @@ type AccountingCaseData = ProcurementCase & {
   dv?: DV | null;
   attachments?: Attachment[];
   activityLogs?: ActivityLog[];
-  check?: { id: string } | null;
+  check?: Check | null;
 };
 
 export function AccountingDetailTabs({ caseData, caseId, userRole }: { caseData: AccountingCaseData; caseId: string; userRole: Role }) {

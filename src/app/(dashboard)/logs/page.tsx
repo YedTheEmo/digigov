@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, THead, TBody, TR, TH, TD } from '@/components/ui/table';
@@ -9,6 +10,10 @@ import { Select } from '@/components/ui/select';
 import { ACTION_FILTERS, getActionMeta } from '@/lib/activityLabels';
 import { getStateVariant } from '@/lib/casesLifecycle';
 import type { Prisma } from '@/generated/prisma';
+
+export const metadata: Metadata = {
+  title: 'Activity Logs',
+};
 
 export default async function LogsPage(props: {
   searchParams: Promise<{ q?: string; action?: string; page?: string }>;

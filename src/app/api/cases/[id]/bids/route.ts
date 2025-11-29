@@ -71,16 +71,23 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         throw new Error('Case not found');
       }
       
-      // Check transition (this reads from DB but doesn't modify, so safe in transaction)
-      console.log(`[BID API] Checking transition for case ${caseId}, method: ${existing.method}, current state: ${existing.currentState} → BID_SUBMISSION_OPENING`);
-      await assertCanTransition(existing, 'BID_SUBMISSION_OPENING' as CaseState);
-      
-      // Update state within transaction
-      console.log(`[BID API] Transition validation passed, updating state...`);
-      await tx.procurementCase.update({ 
-        where: { id: caseId }, 
-        data: { currentState: 'BID_SUBMISSION_OPENING' } 
-      });
+      // Only transition state if not already in BID_SUBMISSION_OPENING
+      // This allows multiple bids to be recorded without triggering state transitions
+      if (existing.currentState !== 'BID_SUBMISSION_OPENING') {
+        // Check transition (this reads from DB but doesn't modify, so safe in transaction)
+        console.log(`[BID API] Checking transition for case ${caseId}, method: ${existing.method}, current state: ${existing.currentState} → BID_SUBMISSION_OPENING`);
+        await assertCanTransition(existing, 'BID_SUBMISSION_OPENING' as CaseState);
+        
+        // Update state within transaction
+        console.log(`[BID API] Transition validation passed, updating state...`);
+        await tx.procurementCase.update({ 
+          where: { id: caseId }, 
+          data: { currentState: 'BID_SUBMISSION_OPENING' } 
+        });
+        console.log(`[BID API] State updated successfully to BID_SUBMISSION_OPENING`);
+      } else {
+        console.log(`[BID API] Case already in BID_SUBMISSION_OPENING state, skipping transition`);
+      }
       
       return created;
     }, {
@@ -88,8 +95,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     });
     
     // Log activity outside transaction to avoid long-running operations in transaction
-    await logActivity({ caseId, action: 'bid_submission_opening', toState: 'BID_SUBMISSION_OPENING' });
-    console.log(`[BID API] State updated successfully to BID_SUBMISSION_OPENING`);
+    // Only log state change if state was actually changed
+    const finalCase = await prisma.procurementCase.findUnique({ where: { id: caseId } });
+    if (finalCase?.currentState === 'BID_SUBMISSION_OPENING') {
+      await logActivity({ caseId, action: 'bid_submission_opening', toState: 'BID_SUBMISSION_OPENING' });
+    }
     return NextResponse.json(result, { status: 201 });
   } catch (error) {
     console.error(`[BID API] Failed to create bid or transition state:`, error);

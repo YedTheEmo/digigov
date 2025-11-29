@@ -56,13 +56,13 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6 bg-black/50 animate-fade-in"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 bg-black/50 animate-fade-in"
       onClick={closeOnOverlayClick ? onClose : undefined}
       role="dialog"
       aria-modal="true"
     >
       <div
-        className={`relative w-full bg-white dark:bg-gray-800 rounded-lg shadow-xl animate-slide-up ${sizeClasses[size]}`}
+        className={`relative w-full bg-[var(--color-bg-primary)] rounded-lg shadow-xl animate-slide-up ${sizeClasses[size]}`}
         onClick={(e) => e.stopPropagation()}
       >
         {children}
@@ -73,12 +73,12 @@ export function Modal({
 
 export function ModalHeader({ children, onClose }: { children: React.ReactNode; onClose?: () => void }) {
   return (
-    <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200 dark:border-gray-700">
-      <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 leading-tight">{children}</h2>
+    <div className="flex items-center justify-between px-6 py-5 border-b border-[var(--color-border-primary)]">
+      <h2 className="text-xl font-semibold text-[var(--color-text-primary)] leading-tight">{children}</h2>
       {onClose && (
         <button
           onClick={onClose}
-          className="ml-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-2 -mr-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-offset-2"
+          className="ml-4 text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)] transition-colors p-2 -mr-2 rounded-md hover:bg-[var(--color-bg-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] focus-visible:ring-offset-2"
           aria-label="Close"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -96,7 +96,7 @@ export function ModalBody({ children, className = '' }: { children: React.ReactN
 
 export function ModalFooter({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`flex items-center justify-end gap-3 px-6 py-5 border-t border-gray-200 dark:border-gray-700 ${className}`}>
+    <div className={`flex items-center justify-end gap-3 px-6 py-5 border-t border-[var(--color-border-primary)] ${className}`}>
       {children}
     </div>
   );

@@ -51,8 +51,8 @@ type CaseWithRelations = ProcurementCase & {
   purchaseOrder: { approvedAt: Date | null } | null;
   contract: { signedAt: Date | null } | null;
   ntp: { issuedAt: Date | null } | null;
-  progressBilling: { billedAt: Date | null } | null;
-  pmtInspection: { inspectedAt: Date | null } | null;
+  progressBillings: { billedAt: Date | null }[];
+  pmtInspections: { inspectedAt: Date | null }[];
   deliveries: { deliveredAt: Date | null }[];
   inspection: { inspectedAt: Date | null } | null;
   acceptance: { acceptedAt: Date | null } | null;
@@ -153,10 +153,20 @@ function getStageConfigsForPublicBidding(): StageConfig[] {
       id: 'POSTING',
       label: 'Posting',
       module: 'Procurement',
-      isCompleted: (c) =>
-        ['POSTING', 'BID_BULLETIN', 'PRE_BID_CONF', 'BID_SUBMISSION_OPENING'].includes(
-          c.currentState as string,
-        ) || !!c.postingStartAt,
+      isCompleted: (c) => {
+        const state = c.currentState as string;
+        // If posting period was started, mark complete
+        if (c.postingStartAt) return true;
+        // If we've moved past posting to any later stage, mark complete
+        const postPostingStages = [
+          'BID_BULLETIN', 'PRE_BID_CONF', 'BID_SUBMISSION_OPENING',
+          'TWG_EVALUATION', 'POST_QUALIFICATION', 'BAC_RESOLUTION', 'AWARDED',
+          'PO_APPROVED', 'CONTRACT_SIGNED', 'NTP_ISSUED',
+          'PROGRESS_BILLING', 'PMT_INSPECTION', 'DELIVERY', 'INSPECTION', 'ACCEPTANCE',
+          'ORS', 'DV', 'CHECK', 'CLOSED'
+        ];
+        return postPostingStages.includes(state);
+      },
       dates: (c) => [c.postingStartAt],
     },
     {
@@ -245,10 +255,19 @@ function getStageConfigsForSmallValue(): StageConfig[] {
       id: 'POSTING',
       label: 'Posting',
       module: 'Procurement',
-      isCompleted: (c) =>
-        ['POSTING', 'RFQ_ISSUED', 'QUOTATION_COLLECTION', 'ABSTRACT_OF_QUOTATIONS'].includes(
-          c.currentState as string,
-        ) || !!c.postingStartAt,
+      isCompleted: (c) => {
+        const state = c.currentState as string;
+        // If posting period was started, mark complete
+        if (c.postingStartAt) return true;
+        // If we've moved past posting to any later stage, mark complete
+        const postPostingStages = [
+          'RFQ_ISSUED', 'QUOTATION_COLLECTION', 'ABSTRACT_OF_QUOTATIONS',
+          'BAC_RESOLUTION', 'AWARDED', 'PO_APPROVED', 'CONTRACT_SIGNED', 'NTP_ISSUED',
+          'PROGRESS_BILLING', 'PMT_INSPECTION', 'DELIVERY', 'INSPECTION', 'ACCEPTANCE',
+          'ORS', 'DV', 'CHECK', 'CLOSED'
+        ];
+        return postPostingStages.includes(state);
+      },
       dates: (c) => [c.postingStartAt],
     },
     {
@@ -317,15 +336,15 @@ function getStageConfigsForInfrastructure(): StageConfig[] {
       id: 'PROGRESS_BILLING',
       label: 'Progress billing',
       module: 'Procurement',
-      isCompleted: (c) => !!c.progressBilling,
-      dates: (c) => [c.progressBilling?.billedAt ?? null],
+      isCompleted: (c) => c.progressBillings && c.progressBillings.length > 0,
+      dates: (c) => c.progressBillings?.map(pb => pb.billedAt) ?? [],
     },
     {
       id: 'PMT_INSPECTION',
       label: 'PMT inspection',
       module: 'Procurement',
-      isCompleted: (c) => !!c.pmtInspection,
-      dates: (c) => [c.pmtInspection?.inspectedAt ?? null],
+      isCompleted: (c) => c.pmtInspections && c.pmtInspections.length > 0,
+      dates: (c) => c.pmtInspections?.map(pmt => pmt.inspectedAt) ?? [],
     },
   ];
 }

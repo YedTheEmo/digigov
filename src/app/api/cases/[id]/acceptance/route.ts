@@ -32,7 +32,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   if (!existing) return NextResponse.json({ error: 'Case not found' }, { status: 404 });
 
   const currentState = existing.currentState as CaseState;
-  const canFirstTransition = currentState === 'INSPECTION';
+  const canFirstTransition = currentState === 'INSPECTION' || currentState === 'PMT_INSPECTION';
   const canEditAcceptance = ['ACCEPTANCE', 'ORS', 'DV', 'CHECK', 'CLOSED'].includes(currentState);
 
   if (!canFirstTransition && !canEditAcceptance) {

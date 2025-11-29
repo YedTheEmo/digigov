@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -7,6 +8,10 @@ import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
 import { getCurrentOwner, getStateVariant, type LifecycleStageId } from '@/lib/casesLifecycle';
 import type { Prisma } from '@/generated/prisma';
+
+export const metadata: Metadata = {
+  title: 'Cases',
+};
 
 export default async function CasesPage({
   searchParams,
@@ -32,19 +37,23 @@ export default async function CasesPage({
   });
 
   return (
-    <div className="space-y-8 w-full">
-      <div>
-        <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-3 leading-tight">
-          Cases
-        </h1>
-        <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
-          Read-only overview of all cases across Procurement, Supply, Budget, Accounting, and Cashier.
+    <div className="w-full space-y-8 animate-fade-in">
+      <section className="space-y-2">
+        <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[var(--color-text-tertiary)]">
+          Cases Workspace
         </p>
-      </div>
+        <h1 className="text-3xl font-bold leading-tight text-[var(--color-text-primary)]">
+          Track procurement cases across all modules
+        </h1>
+        <p className="text-sm text-[var(--color-text-secondary)] max-w-3xl">
+          Read-only overview of all cases across Procurement, Supply, Budget, Accounting, and Cashier. 
+          Search by title or ID to view full lifecycle details and activity timeline.
+        </p>
+      </section>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Search Cases</CardTitle>
+      <Card className="border-[var(--color-border-primary)] shadow-none">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-[var(--color-text-primary)]">Search Cases</CardTitle>
           <CardDescription>
             Find a case by title or ID. Open a case to see its full lifecycle and timeline.
           </CardDescription>
@@ -64,9 +73,9 @@ export default async function CasesPage({
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Cases</CardTitle>
+      <Card className="border-[var(--color-border-primary)] shadow-none">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-[var(--color-text-primary)]">All Cases</CardTitle>
           <CardDescription>
             {q
               ? cases.length > 0
@@ -93,10 +102,10 @@ export default async function CasesPage({
                   <Link
                     key={c.id}
                     href={`/cases/${c.id}`}
-                    className="flex items-center justify-between px-5 py-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group"
+                    className="flex items-center justify-between px-5 py-4 border border-[var(--color-border-primary)] rounded-[var(--radius-lg)] hover:bg-[var(--color-bg-hover)] hover:border-[var(--color-primary)] transition-all group"
                   >
                     <div className="flex-1">
-                      <h3 className="font-semibold text-base text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-6">
+                      <h3 className="font-semibold text-base text-[var(--color-text-primary)] group-hover:text-[var(--color-primary)] transition-colors leading-6">
                         {c.title}
                       </h3>
                       <div className="flex flex-wrap items-center gap-3 mt-2">
@@ -124,13 +133,13 @@ export default async function CasesPage({
                             {owner.module} · {owner.roleHint}
                           </Badge>
                         )}
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                        <span className="text-xs text-[var(--color-text-tertiary)]">
                           Updated {new Date(c.updatedAt).toLocaleString()}
                         </span>
                       </div>
                     </div>
                     <svg
-                      className="w-5 h-5 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors"
+                      className="w-5 h-5 text-[var(--color-text-tertiary)] group-hover:text-[var(--color-primary)] transition-colors flex-shrink-0"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"

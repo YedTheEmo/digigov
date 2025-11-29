@@ -27,7 +27,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const body = await req.json();
   const existing = await prisma.procurementCase.findUnique({ where: { id: caseId } });
   if (!existing) return NextResponse.json({ error: 'Case not found' }, { status: 404 });
-  await assertCanTransition(existing, 'BID_BULLETIN' as CaseState);
+  
+  // Only transition state if not already in BID_BULLETIN
+  // This allows multiple bid bulletins to be recorded without triggering state transitions
+  if (existing.currentState !== 'BID_BULLETIN') {
+    await assertCanTransition(existing, 'BID_BULLETIN' as CaseState);
+  }
+  
   const rawNumber = body.number;
   const number =
     rawNumber === undefined || rawNumber === null || rawNumber === ''
@@ -48,8 +54,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       notes: body.notes ?? null,
     },
   });
-  await prisma.procurementCase.update({ where: { id: caseId }, data: { currentState: 'BID_BULLETIN' } });
-  await logActivity({ caseId, action: 'bid_bulletin', toState: 'BID_BULLETIN' });
+  
+  // Only update state if not already in BID_BULLETIN
+  if (existing.currentState !== 'BID_BULLETIN') {
+    await prisma.procurementCase.update({ where: { id: caseId }, data: { currentState: 'BID_BULLETIN' } });
+    await logActivity({ caseId, action: 'bid_bulletin', toState: 'BID_BULLETIN' });
+  }
+  
   return NextResponse.json(created, { status: 201 });
 }
 

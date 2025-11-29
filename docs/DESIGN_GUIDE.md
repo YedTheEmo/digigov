@@ -979,6 +979,29 @@ Darkest (#0d0f12) → Base (#1a1d23) → Elevated (#242830) → Hover (#2a2e38)
 - **AI Assistant Entry:** Dedicated button that opens an assistant panel for “how do I…” workflows, explanations, and shortcuts.
 - **User & Settings:** Profile menu, appearance settings (theme, density, sidebar behavior), and session actions (sign out).
 
+#### Program-Wide Search (Command Palette)
+- **Scope:** Searches **workspaces, utilities, and high-level actions**, not individual case records (record-level search stays on `/cases` and `/search`).
+- **Trigger:** Header search pill and <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + <kbd>K</kbd> shortcut.
+- **Layout:** Centered overlay with a single search field and a vertically stacked list of quick items.
+- **Result Items:** Each item shows a **label** and a short **description** of what it opens or does.
+- **Keyboard Navigation:** Arrow keys to move the active item, <kbd>Enter</kbd> to navigate, <kbd>Esc</kbd> or click outside to close.
+
+#### AI Assistant Panel
+- **Entry:** Header button labeled “Ask DigiGov” with an AI badge icon.
+- **Placement:** Right-hand side panel that slides over the current page.
+- **Use Cases:** Explain workflows, locate features, and answer “how do I…” questions; future iterations may trigger in-app shortcuts.
+- **Structure:** Scrollable conversation area plus a prompt textarea at the bottom.
+- **Accessibility:** `role="dialog"` with focus trap while open; <kbd>Esc</kbd> and a close button both dismiss the panel.
+
+#### Appearance & Layout Settings
+- **Access:** “Appearance & settings” item in the user menu.
+- **Controls:**
+  - Color mode: Light / Dark.
+  - Visual theme: Legacy Gov / Modern Hub.
+  - Density: Comfortable / Compact (affects case lists, tables, and forms).
+  - Sidebar behavior: Start collapsed (icon rail) vs expanded.
+- **Persistence:** Preferences are stored per browser in `localStorage` and applied via CSS variables and `data-visual-theme` / `data-density` attributes on `<html>`.
+
 ### List/Grid Patterns
 
 #### Empty States
@@ -1375,12 +1398,12 @@ Darkest (#0d0f12) → Base (#1a1d23) → Elevated (#242830) → Hover (#2a2e38)
 - Component library v1
 - Dark mode support
 - Accessibility standards
-- Gov.uk inspired theming
+- Dual theming: Legacy Gov (gov.uk-inspired) and Modern Hub (HubSpot-inspired SaaS)
 
 ### Future Considerations
 - Component playground/Storybook
 - Design token automation
-- Additional color themes
+- Additional themes beyond Legacy Gov and Modern Hub (e.g. high-contrast, brand-specific variants)
 - Enhanced animations library
 - Mobile-specific patterns
 

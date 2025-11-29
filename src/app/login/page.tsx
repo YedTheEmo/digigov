@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 
 function LoginForm() {
   const params = useSearchParams();
-  const callbackUrl = params.get('callbackUrl') || '/procurement';
+  const callbackUrl = params.get('callbackUrl') || '/cases';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);

@@ -15,7 +15,33 @@ import Link from 'next/link';
 import { getActionMeta } from '@/lib/activityLabels';
 import { getAttachmentDisplayName } from '@/lib/attachments';
 import { ProgressStages } from '@/components/app/ProgressStages';
-import type { ProcurementCase, ActivityLog, Bid, Quotation, Attachment } from '@/generated/prisma';
+import type {
+  ProcurementCase,
+  ActivityLog,
+  Bid,
+  Quotation,
+  Attachment,
+  RFQ,
+  AbstractOfQuotations,
+  BACResolution,
+  Award,
+  PurchaseOrder,
+  Contract,
+  NoticeToProceed,
+  Delivery,
+  InspectionReport,
+  Acceptance,
+  ORS,
+  DV,
+  Check,
+  CheckAdvice,
+  ProgressBilling,
+  PMTInspectionReport,
+  BidBulletin,
+  PreBidConference,
+  TWGEvaluation,
+  PostQualification,
+} from '@/generated/prisma';
 import { EditDeleteTab } from './EditDeleteTab';
 import type { Role } from '@/lib/permissions';
 
@@ -33,26 +59,26 @@ type CaseDetailData = ProcurementCase & {
   bids?: Bid[];
   quotations?: Quotation[];
   attachments?: Attachment[];
-  bidBulletins?: Array<{ id: string }>;
-  preBid?: { id: string } | null;
-  twgEvaluation?: { id: string } | null;
-  postQualification?: { id: string } | null;
-  bacResolution?: { id: string } | null;
-  award?: { id: string } | null;
-  purchaseOrder?: { id: string } | null;
-  contract?: { id: string } | null;
-  ntp?: { id: string } | null;
-  deliveries?: Array<{ id: string }>;
-  inspection?: { id: string } | null;
-  acceptance?: { id: string } | null;
-  ors?: { id: string } | null;
-  dv?: { id: string } | null;
-  check?: { id: string } | null;
-  checkAdvice?: { id: string } | null;
-  progressBilling?: { id: string } | null;
-  pmtInspection?: { id: string } | null;
-  rfq?: { id: string } | null;
-  abstract?: { id: string; createdAt?: Date | null } | null;
+  bidBulletins?: BidBulletin[];
+  preBid?: PreBidConference | null;
+  twgEvaluation?: TWGEvaluation | null;
+  postQualification?: PostQualification | null;
+  bacResolution?: BACResolution | null;
+  award?: Award | null;
+  purchaseOrder?: PurchaseOrder | null;
+  contract?: Contract | null;
+  ntp?: NoticeToProceed | null;
+  deliveries?: Delivery[];
+  inspection?: InspectionReport | null;
+  acceptance?: Acceptance | null;
+  ors?: ORS | null;
+  dv?: DV | null;
+  check?: Check | null;
+  checkAdvice?: CheckAdvice | null;
+  progressBilling?: ProgressBilling | null;
+  pmtInspection?: PMTInspectionReport | null;
+  rfq?: RFQ | null;
+  abstract?: AbstractOfQuotations | null;
 };
 
 export function CaseDetailTabs({ caseData, caseId, userRole }: { caseData: CaseDetailData; caseId: string; userRole: Role }) {
@@ -125,7 +151,7 @@ export function CaseDetailTabs({ caseData, caseId, userRole }: { caseData: CaseD
       </TabsList>
 
       {/* Overview Tab */}
-      <TabsContent value="overview">
+      <TabsContent value="overview" data-testid="tab-overview">
         <div className="grid md:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
@@ -206,7 +232,7 @@ export function CaseDetailTabs({ caseData, caseId, userRole }: { caseData: CaseD
       </TabsContent>
 
       {/* Timeline Tab */}
-      <TabsContent value="timeline">
+      <TabsContent value="timeline" data-testid="tab-timeline">
         <Card>
           <CardHeader>
             <CardTitle>Activity Timeline</CardTitle>
@@ -215,7 +241,7 @@ export function CaseDetailTabs({ caseData, caseId, userRole }: { caseData: CaseD
             {caseData.activityLogs && caseData.activityLogs.length > 0 ? (
               <div className="space-y-4">
                 {caseData.activityLogs.map((log: ActivityLog, index: number) => (
-                  <div key={log.id} className="flex gap-4">
+                  <div key={log.id} className="flex gap-4" data-testid="activity-log-item">
                     <div className="flex flex-col items-center">
                       <div className="w-3 h-3 rounded-full bg-blue-600 dark:bg-blue-500"></div>
                       {index < (caseData.activityLogs?.length ?? 0) - 1 && (
@@ -250,7 +276,7 @@ export function CaseDetailTabs({ caseData, caseId, userRole }: { caseData: CaseD
       </TabsContent>
 
       {/* Quotations/Bids Tab */}
-      <TabsContent value="quotations">
+      <TabsContent value="quotations" data-testid="tab-quotations">
         <Card>
           <CardHeader>
             <CardTitle>
@@ -403,7 +429,7 @@ export function CaseDetailTabs({ caseData, caseId, userRole }: { caseData: CaseD
       </TabsContent>
 
       {/* Attachments Tab */}
-      <TabsContent value="attachments">
+      <TabsContent value="attachments" data-testid="tab-attachments">
         <Card>
           <CardHeader>
             <CardTitle>Attachments</CardTitle>

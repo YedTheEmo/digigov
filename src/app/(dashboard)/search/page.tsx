@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -6,6 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
 import { getCurrentOwner, getStateVariant, type LifecycleStageId } from '@/lib/casesLifecycle';
+
+export const metadata: Metadata = {
+  title: 'Search',
+};
 
 export default async function SearchPage({
   searchParams,

@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,6 +7,10 @@ import { EmptyState } from '@/components/ui/empty-state';
 import Link from 'next/link';
 import type { Prisma } from '@/generated/prisma';
 import type { CaseState } from '@/generated/prisma';
+
+export const metadata: Metadata = {
+  title: 'Budget Management',
+};
 
 const PRE_BUDGET_STATES = ['ACCEPTANCE'] as const;
 const POST_BUDGET_STATES = ['ORS', 'DV', 'CHECK', 'CLOSED'] as const;
@@ -63,10 +68,10 @@ export default async function BudgetPage({
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-8 animate-slide-right">
         <div className="flex-1 min-w-0">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4 leading-tight">
+          <h1 className="text-4xl font-bold text-[var(--color-text-primary)] mb-4 leading-tight">
             Budget Management
           </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
+          <p className="text-lg text-[var(--color-text-secondary)] leading-relaxed">
             Manage Obligation Request and Status (ORS)
           </p>
         </div>
@@ -85,7 +90,7 @@ export default async function BudgetPage({
             <div className="flex items-center gap-3 flex-shrink-0 flex-wrap">
               <form action="" method="GET" className="flex items-center gap-3 flex-wrap md:flex-nowrap">
                 <div className="relative w-full md:w-64">
-                  <svg className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-tertiary)] pointer-events-none z-10 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                   <input
@@ -93,14 +98,14 @@ export default async function BudgetPage({
                     name="search"
                     defaultValue={search}
                     placeholder="Search cases..."
-                    className="w-full border border-gray-300 dark:border-[#3a3f4a] rounded-lg pl-10 pr-3 py-2 text-sm bg-white dark:bg-[#242830] text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-600/20 focus:border-green-600 hover:border-gray-400 dark:hover:border-gray-500"
+                    className="w-full border border-[var(--color-border-primary)] rounded-lg pl-10 pr-3 py-2 text-sm bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] placeholder-[var(--color-text-tertiary)] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--color-border-focus)]/20 focus:border-[var(--color-border-focus)] hover:border-[var(--color-border-secondary)]"
                   />
                 </div>
                 
                 <select
                   name="state"
                   defaultValue={state || 'ALL'}
-                  className="border border-gray-300 dark:border-[#3a3f4a] rounded-lg px-3 py-2 text-sm bg-white dark:bg-[#242830] text-gray-900 dark:text-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-600/20 focus:border-green-600 hover:border-gray-400 dark:hover:border-gray-500"
+                  className="border border-[var(--color-border-primary)] rounded-lg px-3 py-2 text-sm bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--color-border-focus)]/20 focus:border-[var(--color-border-focus)] hover:border-[var(--color-border-secondary)]"
                 >
                   <option value="ALL">All States</option>
                   <option value="ACCEPTANCE">Acceptance</option>
@@ -110,7 +115,7 @@ export default async function BudgetPage({
                 <select
                   name="sort"
                   defaultValue={sort || 'newest'}
-                  className="border border-gray-300 dark:border-[#3a3f4a] rounded-lg px-3 py-2 text-sm bg-white dark:bg-[#242830] text-gray-900 dark:text-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-600/20 focus:border-green-600 hover:border-gray-400 dark:hover:border-gray-500"
+                  className="border border-[var(--color-border-primary)] rounded-lg px-3 py-2 text-sm bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--color-border-focus)]/20 focus:border-[var(--color-border-focus)] hover:border-[var(--color-border-secondary)]"
                 >
                   <option value="newest">Newest First</option>
                   <option value="oldest">Oldest First</option>
@@ -121,7 +126,7 @@ export default async function BudgetPage({
                 <select
                   name="filter"
                   defaultValue={filterMode}
-                  className="border border-gray-300 dark:border-[#3a3f4a] rounded-lg px-3 py-2 text-sm bg-white dark:bg-[#242830] text-gray-900 dark:text-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-600/20 focus:border-green-600 hover:border-gray-400 dark:hover:border-gray-500"
+                  className="border border-[var(--color-border-primary)] rounded-lg px-3 py-2 text-sm bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--color-border-focus)]/20 focus:border-[var(--color-border-focus)] hover:border-[var(--color-border-secondary)]"
                 >
                   <option value="pre-budget">In Progress</option>
                   <option value="post-budget">Past Budget</option>
